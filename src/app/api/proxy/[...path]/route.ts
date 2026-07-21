@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { proxyRequest, getServiceConfig } from "@/lib/agent/proxy";
+import { proxyRequest } from "@/lib/agent/proxy";
 import { checkAccessPolicy, logAudit } from "@/lib/agent/policy";
 
 export const runtime = "nodejs";

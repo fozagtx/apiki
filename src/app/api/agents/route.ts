@@ -53,3 +53,25 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Agent ID required" }, { status: 400 });
+    }
+
+    // Also delete any policies associated with this agent
+    await prisma.accessPolicy.deleteMany({ where: { agentId: id } });
+    await prisma.agent.delete({ where: { id } });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to delete agent" },
+      { status: 500 }
+    );
+  }
+}
