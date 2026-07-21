@@ -40,6 +40,8 @@ The build is intentionally honest about scope. It uses a live Neon database, but
 
 We built Apiki as a Next.js, React, TypeScript, Prisma, and Neon app. The workspace uses the browser Web Crypto API to derive an AES-GCM encryption key from the user's passphrase with PBKDF2 (210,000 iterations). API key values are encrypted before they are sent to the API, so Neon stores ciphertext and metadata rather than plaintext secrets.
 
+**Database requirement:** The encrypted workspace feature requires a Neon Postgres database. Without DATABASE_URL configured, the app will run but workspace creation/unlock will fail. The landing page and UI remain accessible for browsing the product.
+
 The agent broker layer adds:
 
 - **Proxy gateway** (`/api/proxy/[...path]`) — catch-all route that intercepts requests, checks access policies, decrypts keys from Neon, injects them into outgoing requests, and forwards to real APIs

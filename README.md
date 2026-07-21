@@ -78,8 +78,12 @@ Apiki Proxy Gateway (/api/proxy/[...path])
 
 **Requirements:**
 - Node.js 18+
-- Neon Postgres database (free tier works)
 - npm or yarn
+
+**Optional (for full workspace functionality):**
+- Neon Postgres database (free tier works)
+
+**Note:** Apiki requires a Neon database to use the encrypted workspace feature (storing API keys, managing agents, policies, audit logs). Without a database, you can view the landing page and UI, but workspace creation/unlock will fail with a database connection error.
 
 **Installation:**
 
@@ -91,11 +95,11 @@ cd apiki
 # Install dependencies
 npm install
 
-# Set up environment variables
+# Set up environment variables (only if you have a Neon database)
 cp .env.example .env
-# Edit .env and add your Neon DATABASE_URL and DIRECT_URL
+# Edit .env and add your Neon DATABASE_URL if you have one
 
-# Push schema to database
+# Push schema to database (only if you have a Neon database)
 npm run db:push
 
 # Start development server
@@ -218,6 +222,7 @@ npx tsc --noEmit
 
 ## Important limits
 
+- **Database required for workspace features** — The encrypted workspace (API keys, agents, policies, audit logs) requires a Neon Postgres database. Without DATABASE_URL configured, the app will run but workspace creation/unlock will fail. The landing page and UI remain accessible.
 - **Single workspace MVP** — Apiki currently supports one workspace per deployment. Multi-workspace and team auth are not implemented.
 - **No provider validation** — Apiki does not validate keys against provider APIs. It stores encrypted keys and proxies requests.
 - **No real traffic analytics** — Analytics are derived from stored metadata, not live API traffic.
