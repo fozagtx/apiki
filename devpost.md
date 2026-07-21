@@ -2,7 +2,7 @@
 
 API keys are easy to create and surprisingly hard to manage well. They end up in notes, chat messages, `.env` files, old dashboards, and forgotten accounts. But the bigger problem we discovered while building: AI coding agents need API keys to do their job, and giving them direct access means keys end up in context windows, logs, screenshots, and chat histories. Every one of those is a leak vector.
 
-Apiki started from a simple question: what if AI agents could access APIs without ever seeing the keys? And while we were at it — what would a calm, security-minded workspace look like for developers managing those same keys?
+So we asked: what if AI agents could access APIs without ever seeing the keys? And while we were at it — what would a calm, security-minded workspace look like for developers managing those same keys?
 
 ## What it does
 
@@ -32,11 +32,11 @@ Apiki acts as a **secret broker** — AI agents (Cline, Codex, Cursor, etc.) acc
 
 Agents get API access. They never see credentials. Keys are decrypted only during request forwarding and exist in memory for microseconds.
 
-The build is intentionally honest about scope. It uses a local SQLite database, but does not pretend to provide provider validation, traffic analytics, billing, email alerts, or team collaboration.
+The build is honest about scope. It uses a local SQLite database, but doesn't pretend to provide provider validation, traffic analytics, billing, email alerts, or team collaboration.
 
 ## How we built it
 
-We built Apiki as a Next.js, React, TypeScript, and Prisma app with SQLite storage. The workspace uses the browser Web Crypto API to derive an AES-GCM encryption key from the user's passphrase with PBKDF2 (210,000 iterations). API key values are encrypted before they are sent to the API, so the database stores ciphertext and metadata rather than plaintext secrets.
+Apiki is a Next.js, React, TypeScript, and Prisma app with SQLite storage. The workspace uses the browser Web Crypto API to derive an AES-GCM encryption key from the user's passphrase with PBKDF2 (210,000 iterations). API key values are encrypted before they are sent to the API, so the database stores ciphertext and metadata rather than plaintext secrets.
 
 **Database requirement:** The encrypted workspace feature requires a SQLite database file. Without `DATABASE_URL` configured, the app will run but workspace creation/unlock will fail. The landing page and UI remain accessible for browsing the product.
 
@@ -71,29 +71,29 @@ The biggest challenge was resisting fake demo shortcuts. A product like this can
 
 The agent broker architecture required careful thought about where decryption happens. We went through several iterations before landing on the proxy pattern: agent → MCP/proxy → decrypt → inject → forward. The key never touches the agent's context window.
 
-Another challenge was connecting live storage without overstating the security model. Apiki encrypts secrets before persistence, but it does not claim to replace a production team secrets manager yet.
+Another challenge was connecting live storage without overstating the security model. Apiki encrypts secrets before persistence, but it doesn't claim to replace a production team secrets manager yet.
 
 The UI also needed refinement. We moved away from scattered one-off components and built a consistent primitive system so the app feels like a coherent product instead of a collection of isolated screens.
 
 ## Accomplishments that we're proud of
 
-We are proud that Apiki has a real encrypted workspace flow instead of a static mockup. Users can create a workspace, add encrypted key records, reveal and copy decrypted values after unlock, delete records, mark keys rotated, and review risk checks.
+Apiki has a real encrypted workspace flow instead of a static mockup. Users can create a workspace, add encrypted key records, reveal and copy decrypted values after unlock, delete records, mark keys rotated, and review risk checks.
 
-We are especially proud of the agent broker. It solves a real problem — AI agents need API access but shouldn't hold credentials. The proxy pattern means agents get full API functionality while keys remain encrypted and server-side. Every access is policy-controlled and audited.
+The agent broker solves a real problem — AI agents need API access but shouldn't hold credentials. The proxy pattern means agents get full API functionality while keys remain encrypted and server-side. Every access is policy-controlled and audited.
 
-We are also proud of the honesty in the product. Empty states stay empty. Integration limitations are visible. The app does not invent traffic, alerts, integrations, or hosted activity.
+The honesty in the product matters. Empty states stay empty. Integration limitations are visible. The app doesn't invent traffic, alerts, integrations, or hosted activity.
 
 ## What we learned
 
-We learned that trust is as much a product-design problem as it is a technical problem. Encryption matters, but so do clear empty states, honest labels, route gates, and avoiding fake success.
+Trust is as much a product-design problem as it is a technical problem. Encryption matters, but so do clear empty states, honest labels, route gates, and avoiding fake success.
 
-We also learned that API key management is not only about storing secrets. The surrounding metadata matters: ownership, environment, docs, cost, status, and rotation policy are what make credentials maintainable over time.
+API key management is not only about storing secrets. The surrounding metadata matters: ownership, environment, docs, cost, status, and rotation policy are what make credentials maintainable over time.
 
-And we learned that the secret broker pattern for AI agents is surprisingly straightforward once you have encrypted storage. The proxy gateway, policy engine, and audit logging layer naturally on top of the encrypted workspace.
+The secret broker pattern for AI agents is surprisingly straightforward once you have encrypted storage. The proxy gateway, policy engine, and audit logging layer naturally on top of the encrypted workspace.
 
 ## What's next for project
 
-Next, Apiki could grow from a single-workspace key manager into a team-ready API key and agent access platform.
+Apiki could grow from a single-workspace key manager into a team-ready API key and agent access platform.
 
 Planned next steps include:
 
