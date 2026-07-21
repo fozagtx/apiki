@@ -42,11 +42,11 @@ export async function loadApiStatus(): Promise<LiveStatus> {
   if (!response.ok) {
     return {
       state: payload.status === "unconfigured" ? "unconfigured" : "error",
-      message: typeof payload.message === "string" ? payload.message : "Neon database is unavailable.",
+      message: typeof payload.message === "string" ? payload.message : "Database is unavailable.",
     };
   }
 
-  return { state: "ready", message: "Neon database connected." };
+  return { state: "ready", message: "SQLite database connected." };
 }
 
 export function getErrorMessage(error: unknown, fallback: string) {

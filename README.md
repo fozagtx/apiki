@@ -1,5 +1,7 @@
 # Apiki
 
+> **Repository:** [YOUR_REPO_URL_HERE]
+
 Live encrypted API key workspace and secret broker for AI coding agents.
 
 ## What is it?
@@ -8,7 +10,245 @@ Apiki is a zero-knowledge secret proxy that lets AI agents access APIs without e
 
 **Core components:**
 
-1. **Encrypted Workspace** (required) — Store API keys with client-side encryption. Keys are encrypted in your browser before reaching Neon. You control the passphrase.
+### Supported Platforms
+
+- **Operating Systems:** macOS, Linux, Windows (WSL recommended)
+- **Node.js:** v18.17.0 or higher (LTS recommended)
+- **Browsers:** Chrome 90+, Firefox 88+, Safari 15+, Edge 90+ (for Web Crypto API support)
+- **Agents:** Cline, Codex, Cursor, Continue, Grok, or any MCP-compatible agent
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Git
+- A modern web browser
+- (Optional) An AI coding agent that supports MCP or HTTP proxies
+
+### Step 1: Install Apiki
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd apiki
+
+# Install dependencies
+npm install
+
+# Initialize the SQLite database
+npm run db:generate
+npm run db:push
+
+# Start the development server
+npm run dev
+```
+
+Apiki will be running at `http://localhost:5173`
+
+### Step 2: Create Your Workspace
+
+1. Open `http://localhost:5173` in your browser
+2. Click "Create Workspace"
+3. Enter a **strong passphrase** (you'll need this to unlock your workspace)
+4. Add your first API key:
+   - Service: e.g., "vercel", "openai", "github"
+   - Name: e.g., "Production Vercel Token"
+   - API Key: paste your actual API key
+   - Environment: Production/Staging/Development
+5. Click "Save"
+
+Your API key is now encrypted with AES-256-GCM using PBKDF2 key derivation (210,000 iterations). The plaintext key never touches the server.
+
+### Step 3: Configure Your Agent
+
+#### Option A: MCP Server (Recommended for Cline, Codex, Cursor)
+
+Edit your agent's MCP configuration file:
+
+**For Cline** (`~/.cline/mcp_settings.json`):
+```json
+{
+  "mcpServers": {
+    "apiki": {
+      "command": "node",
+      "args": ["/absolute/path/to/apiki/packages/mcp-server/dist/index.js"],
+      "env": {
+        "APIKI_BASE_URL": "http://localhost:5173",
+        "APIKI_AGENT_ID": "cline",
+        "APIKI_PASSPHRASE": "your-workspace-passphrase"
+      }
+    }
+  }
+}
+```
+
+**For Codex** (`~/.codex/config.json`):
+```json
+{
+  "mcpServers": {
+    "apiki": {
+      "command": "node",
+      "args": ["/absolute/path/to/apiki/packages/mcp-server/dist/index.js"],
+      "env": {
+        "APIKI_BASE_URL": "http://localhost:5173",
+        "APIKI_AGENT_ID": "codex",
+        "APIKI_PASSPHRASE": "your-workspace-passphrase"
+      }
+    }
+  }
+}
+```
+
+**For Cursor** (`.cursor/mcp.json` in your project):
+```json
+{
+  "mcpServers": {
+    "apiki": {
+      "command": "node",
+      "args": ["/absolute/path/to/apiki/packages/mcp-server/dist/index.js"],
+      "env": {
+        "APIKI_BASE_URL": "http://localhost:5173",
+        "APIKI_AGENT_ID": "cursor",
+        "APIKI_PASSPHRASE": "your-workspace-passphrase"
+      }
+    }
+  }
+}
+```
+
+#### Option B: HTTP Proxy (For any agent or custom integration)
+
+Your agent can call Apiki's proxy directly:
+
+```bash
+# Example: Call Vercel API through Apiki proxy
+curl -X GET http://localhost:5173/api/proxy/vercel/v9/projects \
+  -H "X-Apiki-Agent: my-agent" \
+  -H "X-Apiki-Passphrase: your-workspace-passphrase"
+```
+
+The proxy will:
+1. Check access policies for the agent
+2. Decrypt the Vercel API key from the database
+3. Inject it into the request as `Authorization: Bearer <key>`
+4. Forward to `https://api.vercel.com/v9/projects`
+5. Return the response (without exposing the key)
+
+### Step 4: Set Up Access Policies
+
+Create policies to control what each agent can do:
+
+```bash
+# Allow Cline to read Vercel projects (GET only)
+curl -X POST http://localhost:5173/api/policies \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "cline",
+    "service": "vercel",
+    "allowedMethods": ["GET"],
+    "allowedPaths": ["/v9/projects", "/v9/projects/*"],
+    "maxRequestsPerHour": 60,
+    "requireApprovalAbove": 0
+  }'
+
+# Allow Codex to call OpenAI API (all methods)
+curl -X POST http://localhost:5173/api/policies \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "codex",
+    "service": "openai",
+    "allowedMethods": ["*"],
+    "allowedPaths": ["*"],
+    "maxRequestsPerHour": 100,
+    "requireApprovalAbove": 5.00
+  }'
+```
+
+### Step 5: Verify Everything Works
+
+#### Test the Health Check
+
+```bash
+curl http://localhost:5173/api/health
+```
+
+Expected response:
+```json
+{
+  "ok": true,
+  "status": "ready",
+  "database": "sqlite",
+  "path": "/absolute/path/to/prisma/dev.db",
+  "exists": true
+}
+```
+
+#### Test the Proxy
+
+```bash
+# List available services
+curl http://localhost:5173/api/services \
+  -H "X-Apiki-Passphrase: your-workspace-passphrase"
+```
+
+Expected response:
+```json
+{
+  "services": [
+    { "name": "vercel", "label": "Vercel", "status": "active", "hasKey": true },
+    { "name": "openai", "label": "OpenAI", "status": "not_configured", "hasKey": false }
+  ]
+}
+```
+
+#### Test an Agent Call (via MCP)
+
+In your agent (Cline, Codex, etc.), try:
+```
+Use Apiki to list my Vercel projects
+```
+
+The agent should call the `list_services` or `call_api` tool, and Apiki will proxy the request without exposing your API key.
+
+#### Check the Audit Log
+
+```bash
+curl "http://localhost:5173/api/audit?limit=10"
+```
+
+You should see entries for every API call made through the proxy, including:
+- Agent ID
+- Service name
+- HTTP method and path
+- Status (allowed/denied)
+- Timestamp
+
+### Troubleshooting
+
+**"Database is unavailable"**
+- Run `npm run db:push` to initialize the SQLite database
+- Check that `prisma/dev.db` exists
+
+**"Invalid passphrase"**
+- Make sure you're using the exact passphrase you created the workspace with
+- The passphrase is case-sensitive
+
+**"No policy found for this agent/service"**
+- Create an access policy for the agent and service combination
+- See Step 4 above
+
+**Agent can't connect to MCP server**
+- Verify the absolute path to `packages/mcp-server/dist/index.js`
+- Check that `APIKI_BASE_URL` points to your running Apiki instance
+- Ensure `APIKI_PASSPHRASE` matches your workspace passphrase
+
+**Proxy returns 403 Forbidden**
+- Check the audit log to see the denial reason
+- Verify the agent has a policy for that service
+- Ensure the HTTP method and path are allowed
+
+**Core components:**
+
+1. **Encrypted Workspace** (required) — Store API keys with client-side encryption. Keys are encrypted in your browser before reaching the database. You control the passphrase.
 
 2. **Proxy Gateway** (required) — HTTP proxy at `/api/proxy/[...path]` that decrypts keys server-side, injects them into requests, and forwards to real APIs. Agents call the proxy, not the APIs directly.
 
@@ -37,7 +277,7 @@ Apiki Proxy Gateway (/api/proxy/[...path])
   ├─ 1. Check access policy → allowed / denied
   │      (if denied: return 403, log to audit)
   │
-  ├─ 2. Decrypt key from Neon (AES-GCM)
+  ├─ 2. Decrypt key from database (AES-GCM)
   │      (key exists only in memory for microseconds)
   │
   ├─ 3. Inject key into request
@@ -72,7 +312,7 @@ Apiki Proxy Gateway (/api/proxy/[...path])
 - **Client-side encryption** — Keys are encrypted in your browser before reaching the database. You control the passphrase.
 - **Works with any MCP-compatible agent** — Cline, Codex, Cursor, Continue, Grok, etc.
 
-**Note:** Apiki is a secret broker, not a secret store. Agents get access to APIs, not to keys. Speed and rate limits depend on your Neon plan and the target APIs.
+**Note:** Apiki is a secret broker, not a secret store. Agents get access to APIs, not to keys. Speed and rate limits depend on your database setup and the target APIs.
 
 ## Install
 
@@ -81,9 +321,9 @@ Apiki Proxy Gateway (/api/proxy/[...path])
 - npm or yarn
 
 **Optional (for full workspace functionality):**
-- Neon Postgres database (free tier works)
+- SQLite database (included by default)
 
-**Note:** Apiki requires a Neon database to use the encrypted workspace feature (storing API keys, managing agents, policies, audit logs). Without a database, you can view the landing page and UI, but workspace creation/unlock will fail with a database connection error.
+**Note:** Apiki uses a local SQLite database for the encrypted workspace feature (storing API keys, managing agents, policies, audit logs). The database is created automatically when you run `npm run db:push`.
 
 **Installation:**
 
@@ -95,11 +335,11 @@ cd apiki
 # Install dependencies
 npm install
 
-# Set up environment variables (only if you have a Neon database)
+# Set up environment variables
 cp .env.example .env
-# Edit .env and add your Neon DATABASE_URL if you have one
+# Edit .env if needed (default SQLite path works out of the box)
 
-# Push schema to database (only if you have a Neon database)
+# Push schema to database
 npm run db:push
 
 # Start development server
@@ -163,8 +403,7 @@ Replace `YOUR_AGENT_ID` with the agent ID from `/agents`, and use your workspace
 **Environment variables (`.env`):**
 
 ```bash
-DATABASE_URL="postgresql://USER:PASSWORD@HOST-POOLER.neon.tech/neondb?sslmode=require"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST.neon.tech/neondb?sslmode=require"
+DATABASE_URL="file:./dev.db"
 PORT=5173
 ```
 
@@ -222,7 +461,7 @@ npx tsc --noEmit
 
 ## Important limits
 
-- **Database required for workspace features** — The encrypted workspace (API keys, agents, policies, audit logs) requires a Neon Postgres database. Without DATABASE_URL configured, the app will run but workspace creation/unlock will fail. The landing page and UI remain accessible.
+- **Database required for workspace features** — The encrypted workspace (API keys, agents, policies, audit logs) requires the SQLite database. Without `DATABASE_URL` configured, the app will run but workspace creation/unlock will fail. The landing page and UI remain accessible.
 - **Single workspace MVP** — Apiki currently supports one workspace per deployment. Multi-workspace and team auth are not implemented.
 - **No provider validation** — Apiki does not validate keys against provider APIs. It stores encrypted keys and proxies requests.
 - **No real traffic analytics** — Analytics are derived from stored metadata, not live API traffic.
@@ -297,13 +536,13 @@ To stop using Apiki:
 # Stop the development server (Ctrl+C)
 
 # Remove the database (optional)
-# Drop the Neon database or delete the workspace from /settings
+# Delete the workspace from /settings or remove prisma/dev.db
 
 # Remove the project directory
 rm -rf apiki
 ```
 
-**Note:** API keys are encrypted in Neon. If you delete the workspace from `/settings`, all encrypted keys are removed. If you drop the database, all data is gone. Back up any keys you need before uninstalling.
+**Note:** API keys are encrypted in the database. If you delete the workspace from `/settings`, all encrypted keys are removed. If you delete the database file, all data is gone. Back up any keys you need before uninstalling.
 
 ## License
 

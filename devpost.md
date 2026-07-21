@@ -1,5 +1,3 @@
-# Apiki
-
 ## Inspiration
 
 API keys are easy to create and surprisingly hard to manage well. They end up in notes, chat messages, `.env` files, old dashboards, and forgotten accounts. But the bigger problem we discovered while building: AI coding agents need API keys to do their job, and giving them direct access means keys end up in context windows, logs, screenshots, and chat histories. Every one of those is a leak vector.
@@ -12,7 +10,7 @@ Apiki is a live encrypted API key workspace and **zero-knowledge secret broker f
 
 ### For Developers
 
-Users create an encrypted workspace with a passphrase, add API key records, store secret values as ciphertext in Neon, and track operational metadata around each key.
+Users create an encrypted workspace with a passphrase, add API key records, store secret values as ciphertext in a local SQLite database, and track operational metadata around each key.
 
 Apiki helps users manage:
 
@@ -34,20 +32,20 @@ Apiki acts as a **secret broker** — AI agents (Cline, Codex, Cursor, etc.) acc
 
 Agents get API access. They never see credentials. Keys are decrypted only during request forwarding and exist in memory for microseconds.
 
-The build is intentionally honest about scope. It uses a live Neon database, but does not pretend to provide provider validation, traffic analytics, billing, email alerts, or team collaboration.
+The build is intentionally honest about scope. It uses a local SQLite database, but does not pretend to provide provider validation, traffic analytics, billing, email alerts, or team collaboration.
 
 ## How we built it
 
-We built Apiki as a Next.js, React, TypeScript, Prisma, and Neon app. The workspace uses the browser Web Crypto API to derive an AES-GCM encryption key from the user's passphrase with PBKDF2 (210,000 iterations). API key values are encrypted before they are sent to the API, so Neon stores ciphertext and metadata rather than plaintext secrets.
+We built Apiki as a Next.js, React, TypeScript, and Prisma app with SQLite storage. The workspace uses the browser Web Crypto API to derive an AES-GCM encryption key from the user's passphrase with PBKDF2 (210,000 iterations). API key values are encrypted before they are sent to the API, so the database stores ciphertext and metadata rather than plaintext secrets.
 
-**Database requirement:** The encrypted workspace feature requires a Neon Postgres database. Without DATABASE_URL configured, the app will run but workspace creation/unlock will fail. The landing page and UI remain accessible for browsing the product.
+**Database requirement:** The encrypted workspace feature requires a SQLite database file. Without `DATABASE_URL` configured, the app will run but workspace creation/unlock will fail. The landing page and UI remain accessible for browsing the product.
 
 The agent broker layer adds:
 
-- **Proxy gateway** (`/api/proxy/[...path]`) — catch-all route that intercepts requests, checks access policies, decrypts keys from Neon, injects them into outgoing requests, and forwards to real APIs
+- **Proxy gateway** (`/api/proxy/[...path]`) — catch-all route that intercepts requests, checks access policies, decrypts keys from the local database, injects them into outgoing requests, and forwards to real APIs
 - **MCP server** (`packages/mcp-server`) — standalone Node.js package using `@modelcontextprotocol/sdk` that agents connect to via stdio transport
 - **Policy engine** — checks agent ID against service/method/path rules, enforces rate limits via audit log counting, supports time windows
-- **Audit system** — every access attempt (allowed or denied) is logged to Neon with full context
+- **Audit system** — every access attempt (allowed or denied) is logged to the local database with full context
 
 The UI is built with a shared primitive layer for buttons, cards, panels, fields, badges, banners, dialogs, and empty states. The visual system uses a Mouve-inspired premium product theme with pill CTAs, raised primary actions, and consistent card/icon treatment.
 

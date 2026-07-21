@@ -29,28 +29,78 @@ export type AuditEntry = {
   ip?: string;
 };
 
+// ── SQLite serialisation helpers ────────────────────────────────────
+// SQLite has no native String[] or Json column types, so we store them
+// as JSON-encoded TEXT and parse/stringify at the boundary.
+
+function parseJsonArray(value: string): string[] {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function parseJsonWindow(value: string | null): { start: string; end: string } | undefined {
+  if (!value) return undefined;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
+
+function rowToPolicy(p: {
+  id: string;
+  agentId: string;
+  service: string;
+  allowedMethods: string;
+  allowedPaths: string;
+  maxRequestsPerHour: number;
+  requireApprovalAbove: number;
+  timeWindow: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): AccessPolicy {
+  return {
+    id: p.id,
+    agentId: p.agentId,
+    service: p.service,
+    allowedMethods: parseJsonArray(p.allowedMethods),
+    allowedPaths: parseJsonArray(p.allowedPaths),
+    maxRequestsPerHour: p.maxRequestsPerHour,
+    requireApprovalAbove: p.requireApprovalAbove,
+    timeWindow: parseJsonWindow(p.timeWindow),
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+  };
+}
+
+// ── Policy checks ───────────────────────────────────────────────────
+
 export async function checkAccessPolicy(
   agentId: string,
   service: string,
   method: string,
   path: string
 ): Promise<{ allowed: boolean; reason?: string }> {
-  const policy = await prisma.accessPolicy.findFirst({
-    where: {
-      agentId,
-      service,
-    },
+  const raw = await prisma.accessPolicy.findFirst({
+    where: { agentId, service },
   });
 
-  if (!policy) {
+  if (!raw) {
     return { allowed: false, reason: "No policy found for this agent/service" };
   }
 
-  if (!policy.allowedMethods.includes(method) && !policy.allowedMethods.includes("*")) {
+  const allowedMethods = parseJsonArray(raw.allowedMethods);
+  const allowedPaths = parseJsonArray(raw.allowedPaths);
+
+  if (!allowedMethods.includes(method) && !allowedMethods.includes("*")) {
     return { allowed: false, reason: `Method ${method} not allowed` };
   }
 
-  const pathAllowed = policy.allowedPaths.some((allowedPath) => {
+  const pathAllowed = allowedPaths.some((allowedPath) => {
     if (allowedPath === "*") return true;
     if (allowedPath.endsWith("/*")) {
       const prefix = allowedPath.slice(0, -2);
@@ -64,11 +114,11 @@ export async function checkAccessPolicy(
   }
 
   // Check time window
-  if (policy.timeWindow) {
-    const tw = policy.timeWindow as { start: string; end: string };
+  const timeWindow = parseJsonWindow(raw.timeWindow);
+  if (timeWindow) {
     const now = new Date();
     const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-    if (currentTime < tw.start || currentTime > tw.end) {
+    if (currentTime < timeWindow.start || currentTime > timeWindow.end) {
       return { allowed: false, reason: "Outside allowed time window" };
     }
   }
@@ -84,12 +134,14 @@ export async function checkAccessPolicy(
     },
   });
 
-  if (recentCount >= policy.maxRequestsPerHour) {
+  if (recentCount >= raw.maxRequestsPerHour) {
     return { allowed: false, reason: "Rate limit exceeded" };
   }
 
   return { allowed: true };
 }
+
+// ── Audit log ───────────────────────────────────────────────────────
 
 export async function logAudit(entry: Omit<AuditEntry, "id" | "timestamp">) {
   await prisma.auditLog.create({
@@ -128,31 +180,22 @@ export async function getAuditLog(agentId?: string, limit = 100) {
   }));
 }
 
+// ── CRUD ────────────────────────────────────────────────────────────
+
 export async function createAccessPolicy(policy: Omit<AccessPolicy, "id" | "createdAt" | "updatedAt">) {
   const created = await prisma.accessPolicy.create({
     data: {
       agentId: policy.agentId,
       service: policy.service,
-      allowedMethods: policy.allowedMethods,
-      allowedPaths: policy.allowedPaths,
+      allowedMethods: JSON.stringify(policy.allowedMethods),
+      allowedPaths: JSON.stringify(policy.allowedPaths),
       maxRequestsPerHour: policy.maxRequestsPerHour,
       requireApprovalAbove: policy.requireApprovalAbove,
-      timeWindow: policy.timeWindow,
+      timeWindow: policy.timeWindow ? JSON.stringify(policy.timeWindow) : null,
     },
   });
 
-  return {
-    id: created.id,
-    agentId: created.agentId,
-    service: created.service,
-    allowedMethods: created.allowedMethods,
-    allowedPaths: created.allowedPaths,
-    maxRequestsPerHour: created.maxRequestsPerHour,
-    requireApprovalAbove: created.requireApprovalAbove,
-    timeWindow: created.timeWindow,
-    createdAt: created.createdAt.toISOString(),
-    updatedAt: created.updatedAt.toISOString(),
-  };
+  return rowToPolicy(created);
 }
 
 export async function listAccessPolicies(agentId?: string) {
@@ -162,18 +205,7 @@ export async function listAccessPolicies(agentId?: string) {
     orderBy: { createdAt: "desc" },
   });
 
-  return policies.map((p) => ({
-    id: p.id,
-    agentId: p.agentId,
-    service: p.service,
-    allowedMethods: p.allowedMethods,
-    allowedPaths: p.allowedPaths,
-    maxRequestsPerHour: p.maxRequestsPerHour,
-    requireApprovalAbove: p.requireApprovalAbove,
-    timeWindow: p.timeWindow,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  }));
+  return policies.map(rowToPolicy);
 }
 
 export async function deleteAccessPolicy(id: string) {

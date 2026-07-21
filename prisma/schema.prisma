@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Workspace {
@@ -13,7 +12,7 @@ model Workspace {
   version               Int            @default(1)
   salt                  String
   verifierIv            String
-  verifierCipherText    String         @db.Text
+  verifierCipherText    String
   workspaceName         String
   ownerEmail            String
   monitoringRotation    Boolean        @default(true)
@@ -43,7 +42,7 @@ model ApiKeyRecord {
   lastRotatedAt        DateTime
   createdAt            DateTime
   updatedAt            DateTime
-  cipherText           String   @db.Text
+  cipherText           String
   iv                   String
 
   @@index([workspaceId])
@@ -56,11 +55,11 @@ model AccessPolicy {
   id                    String   @id @default(cuid())
   agentId               String
   service               String
-  allowedMethods        String[]
-  allowedPaths          String[]
+  allowedMethods        String   @default("[]")
+  allowedPaths          String   @default("[]")
   maxRequestsPerHour    Int      @default(60)
   requireApprovalAbove  Float    @default(0)
-  timeWindow            Json?
+  timeWindow            String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 

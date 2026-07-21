@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/db";
+import { prisma, getDatabasePath } from "../../../lib/db";
+import { existsSync } from "node:fs";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  if (!process.env.DATABASE_URL || !process.env.DIRECT_URL) {
+  if (!process.env.DATABASE_URL) {
     return NextResponse.json(
       {
         ok: false,
         status: "unconfigured",
-        message: "Neon database URLs are not configured.",
+        message: "DATABASE_URL is not configured.",
       },
       { status: 503 },
     );
@@ -17,13 +18,20 @@ export async function GET() {
 
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return NextResponse.json({ ok: true, status: "ready", database: "neon" });
+    const dbPath = getDatabasePath();
+    return NextResponse.json({
+      ok: true,
+      status: "ready",
+      database: "sqlite",
+      path: dbPath,
+      exists: existsSync(dbPath),
+    });
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
         status: "error",
-        message: error instanceof Error ? error.message : "Neon database is unavailable.",
+        message: error instanceof Error ? error.message : "SQLite database is unavailable.",
       },
       { status: 503 },
     );

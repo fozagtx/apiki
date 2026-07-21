@@ -60,13 +60,14 @@ export const SERVICE_CONFIGS: Record<string, ServiceConfig> = {
 };
 
 export async function getServiceKey(service: string): Promise<string | null> {
-  const record = await prisma.apiKeyRecord.findFirst({
-    where: {
-      service: { equals: service, mode: "insensitive" },
-      status: "active",
-    },
+  const records = await prisma.apiKeyRecord.findMany({
+    where: { status: "active" },
     orderBy: { updatedAt: "desc" },
   });
+
+  const record = records.find(
+    (r) => r.service.toLowerCase() === service.toLowerCase()
+  );
 
   if (!record) return null;
 
@@ -79,13 +80,14 @@ export async function decryptServiceKey(
   service: string,
   cryptoKey: CryptoKey
 ): Promise<string | null> {
-  const record = await prisma.apiKeyRecord.findFirst({
-    where: {
-      service: { equals: service, mode: "insensitive" },
-      status: "active",
-    },
+  const records = await prisma.apiKeyRecord.findMany({
+    where: { status: "active" },
     orderBy: { updatedAt: "desc" },
   });
+
+  const record = records.find(
+    (r) => r.service.toLowerCase() === service.toLowerCase()
+  );
 
   if (!record) return null;
 
