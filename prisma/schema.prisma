@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Workspace {
+  id                    String         @id
+  version               Int            @default(1)
+  salt                  String
+  verifierIv            String
+  verifierCipherText    String         @db.Text
+  workspaceName         String
+  ownerEmail            String
+  monitoringRotation    Boolean        @default(true)
+  monitoringDocs        Boolean        @default(true)
+  monitoringInactive    Boolean        @default(true)
+  monitoringCost        Boolean        @default(true)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  records               ApiKeyRecord[]
+}
+
+model ApiKeyRecord {
+  id                   String   @id
+  workspaceId              String
+  workspace                Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  service              String
+  name                 String
+  environment          String
+  status               String
+  owner                String
+  description          String   @default("")
+  website              String   @default("")
+  docsUrl              String   @default("")
+  monthlyLimit         Int      @default(0)
+  monthlyCost          Float    @default(0)
+  rotationIntervalDays Int      @default(90)
+  lastRotatedAt        DateTime
+  createdAt            DateTime
+  updatedAt            DateTime
+  cipherText           String   @db.Text
+  iv                   String
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([environment])
+  @@index([lastRotatedAt])
+}
