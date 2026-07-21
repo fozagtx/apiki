@@ -3,6 +3,7 @@
 import {
   BarChart3,
   Bell,
+  Bot,
   Gauge,
   KeyRound,
   Lock,
@@ -10,7 +11,9 @@ import {
   MonitorCheck,
   Plus,
   RefreshCw,
+  ScrollText,
   Settings,
+  Shield,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button, IconButton } from "./ui";
@@ -23,6 +26,9 @@ const NAV_ITEMS = [
   { href: "/rotation", label: "Rotation", icon: RefreshCw },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/monitoring", label: "Monitoring", icon: MonitorCheck },
+  { href: "/agents", label: "Agents", icon: Bot },
+  { href: "/policies", label: "Policies", icon: Shield },
+  { href: "/audit", label: "Audit", icon: ScrollText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
