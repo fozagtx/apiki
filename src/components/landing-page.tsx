@@ -3,6 +3,7 @@
 import {
   ArrowRight,
   BarChart3,
+  Bot,
   CloudOff,
   DatabaseZap,
   KeyRound,
@@ -11,7 +12,7 @@ import {
   Shield,
   UnlockKeyhole,
 } from "lucide-react";
-import { ActionCard, BrandButton, Button, EmptyState, IconTile, StatusLine } from "./ui";
+import { ActionCard, BrandButton, IconTile, StatusLine } from "./ui";
 import type { WorkspaceEnvelope } from "@/lib/types";
 
 function LogoMark() {
@@ -43,21 +44,20 @@ export function LandingPage({
           <div className="hero-copy">
             <div className="eyebrow">
               <Shield size={16} />
-              Live encrypted API key management
+              Encrypted API key workspace + secret broker for AI agents
             </div>
-            <h1>Apiki keeps API keys encrypted, rotated, and accountable</h1>
+            <h1>API keys, encrypted and agent-ready</h1>
             <p>
-              Store encrypted key records in Neon, track rotation health, and keep
-              developer credentials from turning into invisible risk.
+              Store keys in Neon with client-side encryption. Let AI agents call APIs without ever seeing credentials.
             </p>
             <div className="hero-chips" aria-label="Apiki assurances">
-              <span>Neon-backed workspace</span>
-              <span>User-created records only</span>
-              <span>No fake provider claims</span>
+              <span>AES-GCM encryption</span>
+              <span>MCP server for agents</span>
+              <span>Policy-controlled proxy</span>
             </div>
             <div className="hero-actions">
               <a href="/login" className="button button-primary button-lg">Start Secure Workspace <ArrowRight size={18} /></a>
-              <a href="/login" className="button button-secondary button-lg">Open Workspace Gate</a>
+              <a href="/login" className="button button-secondary button-lg">View Demo</a>
             </div>
           </div>
 
@@ -76,7 +76,7 @@ export function LandingPage({
                 <StatusLine icon={<DatabaseZap size={18} />} label="Workspace storage" value={workspace ? "Created" : "Not created"} />
                 <StatusLine icon={<UnlockKeyhole size={18} />} label="Unlock state" value={unlocked ? "Unlocked" : "Locked"} />
                 <StatusLine icon={<KeyRound size={18} />} label="Encrypted records" value={workspace && unlocked ? String(workspace.records.length) : workspace ? "Locked" : "0"} />
-                <StatusLine icon={<CloudOff size={18} />} label="Provider alerts" value="Not connected" />
+                <StatusLine icon={<Bot size={18} />} label="Agent access" value="MCP + Proxy ready" />
               </div>
               <div className="status-footnote">
                 Data panels stay empty until you create records in your encrypted workspace.
@@ -87,30 +87,27 @@ export function LandingPage({
 
         <section className="feature-band" aria-label="Apiki capabilities">
           <div className="section-heading">
-            <span>Workspace workflow</span>
-            <h2>Three focused moves for keeping credentials under control.</h2>
+            <span>Two modes, one workspace</span>
+            <h2>Manage keys yourself or let agents use them securely.</h2>
           </div>
           <div className="feature-grid">
-            <ActionCard icon={<LockKeyhole size={20} />} title="Encrypt" body="Create a passphrase-derived workspace and store encrypted API key records in Neon." />
-            <ActionCard icon={<RefreshCw size={20} />} title="Rotate" body="Set intervals, review due records, and update rotation metadata when a key changes." />
-            <ActionCard icon={<BarChart3 size={20} />} title="Review" body="See health, ownership, cost, status, and documentation gaps from records you create." />
+            <ActionCard icon={<LockKeyhole size={20} />} title="Encrypt" body="Passphrase-derived AES-GCM encryption. Keys encrypted in your browser before reaching Neon." />
+            <ActionCard icon={<Bot size={20} />} title="Agent Proxy" body="AI agents call APIs through the proxy. Keys decrypted server-side, never exposed to agents." />
+            <ActionCard icon={<Shield size={20} />} title="Policy Control" body="Per-agent rules for services, methods, paths, and rate limits. Every access logged." />
           </div>
         </section>
 
         <section className="workflow-band">
           <div className="workflow-copy">
-            <span>Secure by default</span>
-            <h2>Built for the tiny operational details that get ignored during shipping.</h2>
-            <p>
-              Apiki keeps the boring but crucial metadata close to the secret: owner,
-              environment, docs, cost, rotation interval, and status.
-            </p>
+            <span>How it works</span>
+            <h2>Agents get API access without holding credentials.</h2>
           </div>
           <div className="workflow-list">
             {[
-              ["Create encrypted workspace", "Set a passphrase and workspace identity."],
-              ["Add service keys", "Capture docs, ownership, limits, and rotation policy."],
-              ["Review health", "Track overdue rotations and workspace monitoring checks."],
+              ["Create workspace", "Set passphrase, add API keys"],
+              ["Connect agent", "MCP server or HTTP proxy"],
+              ["Agent calls API", "Proxy decrypts, injects, forwards"],
+              ["Audit logged", "Every access tracked with agent ID"],
             ].map(([title, body], index) => (
               <div className="workflow-item" key={title}>
                 <span>{index + 1}</span>
