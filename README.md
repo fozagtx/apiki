@@ -6,7 +6,7 @@ Repo: https://github.com/fozagtx/apiki
 
 Encrypted API key workspace + proxy for AI coding agents. Agents call APIs through Apiki. They never see the raw keys.
 
-Built with Codex — details in [CODEX_USAGE.md](CODEX_USAGE.md). Setup: [INSTALL.md](INSTALL.md).
+Built with Codex - details in [CODEX_USAGE.md](CODEX_USAGE.md). Setup: [INSTALL.md](INSTALL.md).
 
 ## How it works
 
@@ -32,7 +32,7 @@ npm run db:push
 npm run dev
 ```
 
-Open http://localhost:8787 — create a workspace, add keys, then wire an agent. Full agent setup is in [INSTALL.md](INSTALL.md).
+Open http://localhost:8787 - create a workspace, add keys, then wire an agent. Full agent setup is in [INSTALL.md](INSTALL.md).
 
 ## Config
 
@@ -51,11 +51,11 @@ APIKI_PASSPHRASE="your-workspace-passphrase"
 
 ## Pieces
 
-- **Workspace** — passphrase-locked key store (AES-256-GCM, PBKDF2 210k)
-- **Proxy** — `/api/proxy/[...path]`
-- **MCP server** — `packages/mcp-server` (`list_services`, `call_api`, `get_audit_log`)
-- **Policies** — per-agent service/method/path/rate limits
-- **Audit log** — agent, service, method, path, status
+- **Workspace** - passphrase-locked key store (AES-256-GCM, PBKDF2 210k)
+- **Proxy** - `/api/proxy/[...path]`
+- **MCP server** - `packages/mcp-server` (`list_services`, `call_api`, `get_audit_log`)
+- **Policies** - per-agent service/method/path/rate limits
+- **Audit log** - agent, service, method, path, status
 
 Services: Vercel, Neon, OpenAI, GitHub, Stripe, Anthropic, AWS, Supabase. Add more in `src/lib/agent/proxy.ts`.
 

@@ -1,4 +1,4 @@
-# Apiki for AI Agents — Architecture Design
+# Apiki for AI Agents - Architecture Design
 
 ## The Problem
 
@@ -16,7 +16,7 @@ But agents currently access keys through:
 
 ## The Solution: Apiki as a Secret Broker
 
-Apiki becomes a **zero-knowledge secret proxy** — the agent never sees raw keys, but can still use them to call APIs and run tools.
+Apiki becomes a **zero-knowledge secret proxy** - the agent never sees raw keys, but can still use them to call APIs and run tools.
 
 ---
 
@@ -40,10 +40,10 @@ Apiki becomes a **zero-knowledge secret proxy** — the agent never sees raw key
 │  (stdio/SSE)     │   │  (localhost:9876)     │
 │                  │   │                       │
 │  Tools:          │   │  POST /proxy/:service │
-│  - list_services │   │  POST /exec/:service  │
-│  - call_api      │   │  GET  /env/:service   │
-│  - run_command   │   │                       │
-│  - inject_env    │   │  Injects real key     │
+│ - list_services │   │  POST /exec/:service  │
+│ - call_api      │   │  GET  /env/:service   │
+│ - run_command   │   │                       │
+│ - inject_env    │   │  Injects real key     │
 │                  │   │  into request/env      │
 └────────┬─────────┘   └──────────┬────────────┘
          │                        │

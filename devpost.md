@@ -2,7 +2,7 @@
 
 API keys are easy to create and surprisingly hard to manage well. They end up in notes, chat messages, `.env` files, old dashboards, and forgotten accounts. But the bigger problem we discovered while building: AI coding agents need API keys to do their job, and giving them direct access means keys end up in context windows, logs, screenshots, and chat histories. Every one of those is a leak vector.
 
-So we asked: what if AI agents could access APIs without ever seeing the keys? And while we were at it — what would a calm, security-minded workspace look like for developers managing those same keys?
+So we asked: what if AI agents could access APIs without ever seeing the keys? And while we were at it - what would a calm, security-minded workspace look like for developers managing those same keys?
 
 ## What it does
 
@@ -23,12 +23,12 @@ Apiki helps users manage:
 
 ### For AI Agents
 
-Apiki acts as a **secret broker** — AI agents (Codex, Cursor, etc.) access APIs through Apiki's proxy without ever seeing raw keys:
+Apiki acts as a **secret broker** - AI agents (Codex, Cursor, etc.) access APIs through Apiki's proxy without ever seeing raw keys:
 
-- **MCP Server** — Agents connect via Model Context Protocol and call APIs through Apiki's tools
-- **Proxy Gateway** — HTTP proxy at `/api/proxy/[...path]` decrypts keys server-side, injects them into requests, forwards to real APIs, returns only the response
-- **Access Policies** — Per-agent rules controlling which services, methods, paths, and rate limits apply
-- **Audit Logging** — Every agent API call is logged with agent ID, service, method, path, and status
+- **MCP Server** - Agents connect via Model Context Protocol and call APIs through Apiki's tools
+- **Proxy Gateway** - HTTP proxy at `/api/proxy/[...path]` decrypts keys server-side, injects them into requests, forwards to real APIs, returns only the response
+- **Access Policies** - Per-agent rules controlling which services, methods, paths, and rate limits apply
+- **Audit Logging** - Every agent API call is logged with agent ID, service, method, path, and status
 
 Agents get API access. They never see credentials. Keys are decrypted only during request forwarding and exist in memory for microseconds.
 
@@ -42,10 +42,10 @@ Apiki is a Next.js, React, TypeScript, and Prisma app with SQLite storage. The w
 
 The agent broker layer adds:
 
-- **Proxy gateway** (`/api/proxy/[...path]`) — catch-all route that intercepts requests, checks access policies, decrypts keys from the local database, injects them into outgoing requests, and forwards to real APIs
-- **MCP server** (`packages/mcp-server`) — standalone Node.js package using `@modelcontextprotocol/sdk` that agents connect to via stdio transport
-- **Policy engine** — checks agent ID against service/method/path rules, enforces rate limits via audit log counting, supports time windows
-- **Audit system** — every access attempt (allowed or denied) is logged to the local database with full context
+- **Proxy gateway** (`/api/proxy/[...path]`) - catch-all route that intercepts requests, checks access policies, decrypts keys from the local database, injects them into outgoing requests, and forwards to real APIs
+- **MCP server** (`packages/mcp-server`) - standalone Node.js package using `@modelcontextprotocol/sdk` that agents connect to via stdio transport
+- **Policy engine** - checks agent ID against service/method/path rules, enforces rate limits via audit log counting, supports time windows
+- **Audit system** - every access attempt (allowed or denied) is logged to the local database with full context
 
 The UI is built with a shared primitive layer for buttons, cards, panels, fields, badges, banners, dialogs, and empty states. The visual system uses a Mouve-inspired premium product theme with pill CTAs, raised primary actions, and consistent card/icon treatment.
 
@@ -79,7 +79,7 @@ The UI also needed refinement. We moved away from scattered one-off components a
 
 Apiki has a real encrypted workspace flow instead of a static mockup. Users can create a workspace, add encrypted key records, reveal and copy decrypted values after unlock, delete records, mark keys rotated, and review risk checks.
 
-The agent broker solves a real problem — AI agents need API access but shouldn't hold credentials. The proxy pattern means agents get full API functionality while keys remain encrypted and server-side. Every access is policy-controlled and audited.
+The agent broker solves a real problem - AI agents need API access but shouldn't hold credentials. The proxy pattern means agents get full API functionality while keys remain encrypted and server-side. Every access is policy-controlled and audited.
 
 The honesty in the product matters. Empty states stay empty. Integration limitations are visible. The app doesn't invent traffic, alerts, integrations, or hosted activity.
 
