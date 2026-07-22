@@ -1871,6 +1871,11 @@ meter {
   overflow-x: auto;
 }
 
+.mcp-config-block {
+  max-height: 320px;
+  overflow: auto;
+}
+
 .code-block code {
   display: block;
   white-space: pre;

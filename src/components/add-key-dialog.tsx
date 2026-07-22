@@ -82,7 +82,7 @@ export function AddKeyDialog({
         <header className="dialog-header">
           <div>
             <h2 id="add-key-title">Add API Key</h2>
-            <p>Encrypted here, then usable by agents through Policies.</p>
+            <p>Encrypted here. We auto-create the Codex agent, policy, and MCP config.</p>
           </div>
           <IconButton label="Close" onClick={onClose}>
             <X size={18} />
@@ -95,8 +95,8 @@ export function AddKeyDialog({
               <Shield size={18} />
             </IconTile>
             <div>
-              <strong>How agents use this</strong>
-              <span>Save the key for a service (e.g. github). Then go to Agents → add an agent → Policies → allow that agent on that service.</span>
+              <strong>One-step Codex setup</strong>
+              <span>After save, Apiki creates the Codex agent + policy and gives you an MCP config. You only paste your passphrase.</span>
             </div>
           </div>
 

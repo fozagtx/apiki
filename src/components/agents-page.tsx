@@ -1,7 +1,8 @@
 "use client";
 
-import { Bot, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bot, Copy, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { buildMcpConfigJson } from "@/lib/mcp-setup";
 import { Button, EmptyState, Field, Panel, PanelHeader } from "./ui";
 
 type Agent = {
@@ -19,6 +20,8 @@ export function AgentsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [copied, setCopied] = useState(false);
+  const mcpJson = useMemo(() => buildMcpConfigJson("codex"), []);
 
   const loadAgents = async () => {
     try {
@@ -144,32 +147,29 @@ export function AgentsPage() {
       </Panel>
 
       <Panel>
-        <PanelHeader icon={<Bot size={18} />} title="Connect a key to an agent" />
-        <ol className="plain-steps">
-          <li>Add an API key under <strong>Keys</strong> for a service (e.g. github).</li>
-          <li>Add an agent here (name becomes the agent id, e.g. codex).</li>
-          <li>Open <strong>Policies</strong> → allow that agent on that service.</li>
-          <li>Point the agent at Apiki with the same agent id + your passphrase.</li>
-        </ol>
-        <p className="plain-note">
-          You do not attach a key to an agent directly. Keys belong to a service. Agents get access through a policy for that service.
+        <PanelHeader
+          icon={<Bot size={18} />}
+          title="Codex MCP config"
+          action={
+            <Button
+              icon={<Copy size={16} />}
+              onClick={async () => {
+                await navigator.clipboard.writeText(mcpJson);
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 2000);
+              }}
+              size="sm"
+              variant="secondary"
+            >
+              {copied ? "Copied" : "Copy"}
+            </Button>
+          }
+        />
+        <p className="plain-note" style={{ marginTop: 0 }}>
+          Adding an API key auto-creates the Codex agent + policy. Copy this into Codex MCP settings and replace <code>PASTE_YOUR_PASSPHRASE</code>.
         </p>
         <div className="code-block">
-          <code>
-{`{
-  "mcpServers": {
-    "apiki": {
-      "command": "node",
-      "args": ["/Users/kaizen/Desktop/apiki/packages/mcp-server/dist/index.js"],
-      "env": {
-        "APIKI_BASE_URL": "http://localhost:8787",
-        "APIKI_AGENT_ID": "codex",
-        "APIKI_PASSPHRASE": "your-workspace-passphrase"
-      }
-    }
-  }
-}`}
-          </code>
+          <code>{mcpJson}</code>
         </div>
       </Panel>
     </div>

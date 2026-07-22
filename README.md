@@ -10,16 +10,45 @@ Built with Codex - details in [CODEX_USAGE.md](CODEX_USAGE.md). Setup: [INSTALL.
 
 ## How it works
 
-1. Create a workspace with a name + passphrase
-2. Add API keys (encrypted in the browser before save)
-3. Add an agent + a policy for which services it can use
-4. Point Codex/Cursor at the MCP server or HTTP proxy
-5. Apiki decrypts the key server-side, injects it, forwards the request, returns the response
-6. Every call is audit-logged
+1. Create a workspace (name + passphrase)
+2. Add an API key (e.g. OpenAI) - encrypted in the browser before save
+3. Apiki auto-creates a **Codex** agent, a policy for that service, and an MCP config
+4. Paste the MCP config into Codex - replace only `PASTE_YOUR_PASSPHRASE`
+5. When Codex calls an API, Apiki checks policy, decrypts the key, injects it, forwards the request
+6. Codex gets the response. It never sees the raw key. Every call is audit-logged.
 
 ```
-Agent → MCP/Proxy → Policy check → Decrypt key → Inject → Upstream API → Response
+Codex → Apiki MCP → Policy check → Decrypt key → Inject → Upstream API → Response
 ```
+
+### What the MCP config means
+
+After you add a key, Apiki shows something like:
+
+```json
+{
+  "mcpServers": {
+    "apiki": {
+      "command": "node",
+      "args": ["/Users/kaizen/Desktop/apiki/packages/mcp-server/dist/index.js"],
+      "env": {
+        "APIKI_BASE_URL": "http://localhost:8787",
+        "APIKI_AGENT_ID": "codex",
+        "APIKI_PASSPHRASE": "PASTE_YOUR_PASSPHRASE"
+      }
+    }
+  }
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `command` + `args` | Run Apiki's local MCP server |
+| `APIKI_BASE_URL` | Your running Apiki app |
+| `APIKI_AGENT_ID` | Who is calling (`codex`) - must match the agent + policy |
+| `APIKI_PASSPHRASE` | Your workspace passphrase (the only thing you fill in) |
+
+Keep `npm run dev` running while Codex uses Apiki.
 
 ## Run it
 
@@ -32,7 +61,7 @@ npm run db:push
 npm run dev
 ```
 
-Open http://localhost:8787 - create a workspace, add keys, then wire an agent. Full agent setup is in [INSTALL.md](INSTALL.md).
+Open http://localhost:8787 - create a workspace, add a key, copy the MCP config into Codex. More detail: [INSTALL.md](INSTALL.md).
 
 ## Config
 
@@ -40,13 +69,6 @@ Open http://localhost:8787 - create a workspace, add keys, then wire an agent. F
 ```
 DATABASE_URL="file:./dev.db"
 PORT=8787
-```
-
-MCP env:
-```
-APIKI_BASE_URL="http://localhost:8787"
-APIKI_AGENT_ID="codex"
-APIKI_PASSPHRASE="your-workspace-passphrase"
 ```
 
 ## Pieces
