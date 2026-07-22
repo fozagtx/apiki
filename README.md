@@ -1,5 +1,7 @@
 # Apiki
 
+Pitch deck: https://api-keys-for-agentswitho-kxcz4af.gamma.site/
+
 Repository: https://github.com/fozagtx/apiki
 
 API key management workspace for AI coding agents. Stores encrypted keys and proxies API requests so agents never see the actual credentials.
