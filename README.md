@@ -17,8 +17,41 @@ Built with Codex - details in [CODEX_USAGE.md](CODEX_USAGE.md). Setup: [INSTALL.
 5. When Codex calls an API, Apiki checks policy, decrypts the key, injects it, forwards the request
 6. Codex gets the response. It never sees the raw key. Every call is audit-logged.
 
+```mermaid
+flowchart LR
+  Dev[Developer] -->|name + passphrase| UI[Apiki UI]
+  Dev -->|add API key| UI
+  UI -->|ciphertext only| DB[(SQLite)]
+  UI -->|auto-create| Agent[Codex agent + policy]
+  UI -->|MCP config| Codex[Codex]
+
+  Codex -->|MCP call| MCP[Apiki MCP server]
+  MCP -->|proxy request + passphrase| Proxy["/api/proxy"]
+  Proxy -->|check| Policy[Access policy]
+  Policy -->|allowed| Decrypt[Decrypt key]
+  Decrypt --> Inject[Inject auth header]
+  Inject --> API[Upstream API]
+  API -->|response| Codex
+  Proxy -->|log| Audit[(Audit log)]
 ```
-Codex → Apiki MCP → Policy check → Decrypt key → Inject → Upstream API → Response
+
+```mermaid
+sequenceDiagram
+  participant Codex
+  participant MCP as Apiki MCP
+  participant Proxy as Apiki Proxy
+  participant DB as SQLite
+  participant API as Upstream API
+
+  Codex->>MCP: call_api(service, path)
+  MCP->>Proxy: request + agent id + passphrase
+  Proxy->>Proxy: check policy for codex + service
+  Proxy->>DB: load encrypted key
+  Proxy->>Proxy: decrypt with passphrase
+  Proxy->>API: forward with injected key
+  API-->>Proxy: response
+  Proxy-->>Codex: response (no raw key)
+  Proxy->>DB: write audit log
 ```
 
 ### What the MCP config means
