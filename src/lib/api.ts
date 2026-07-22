@@ -46,7 +46,7 @@ export async function loadApiStatus(): Promise<LiveStatus> {
     };
   }
 
-  return { state: "ready", message: "SQLite database connected." };
+  return { state: "ready", message: "SQLite connected" };
 }
 
 export function getErrorMessage(error: unknown, fallback: string) {

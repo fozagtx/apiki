@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { daysUntil, formatDate, isRotationDue, nextRotationAt, recordsDueForRotation } from "@/lib/helpers";
 import type { WorkspaceRecord } from "@/lib/types";
 import { useWorkspace } from "./workspace-provider";
-import { Button, EmptyState, LiveBanner, Panel, PanelHeader } from "./ui";
+import { Button, EmptyState, Panel, PanelHeader } from "./ui";
 import { PolicyItem } from "./shared-components";
 
 export function RotationPage() {
@@ -25,7 +25,6 @@ export function RotationPage() {
 
   return (
     <div className="page-stack">
-      <LiveBanner />
       <Panel>
         <PanelHeader icon={<CalendarClock size={18} />} title="Rotation Schedule" />
         {sortedRecords.length ? (
@@ -41,11 +40,11 @@ export function RotationPage() {
                   return (
                     <tr key={record.id}>
                       <td><strong>{record.service}</strong><small>{record.name}</small></td>
-                      <td><span className={`badge badge-env-${record.environment.toLowerCase()}`}>{record.environment}</span></td>
+                      <td>{record.environment}</td>
                       <td>{record.rotationIntervalDays} days</td>
                       <td>{formatDate(record.lastRotatedAt)}</td>
                       <td className={due ? "overdue" : ""}>{due ? "Overdue" : `${daysUntil(next)} days`}<small>{formatDate(next.toISOString())}</small></td>
-                      <td><span className={`badge badge-status-${due ? "revoked" : record.status}`}>{due ? "Due" : record.status}</span></td>
+                      <td>{due ? "Due" : record.status}</td>
                       <td><Button onClick={() => markRotated(record)} size="sm" variant="secondary"><RefreshCw size={14} /> Mark Rotated</Button></td>
                     </tr>
                   );

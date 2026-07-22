@@ -3,7 +3,7 @@
 import { Activity, AlertTriangle, BarChart3, Gauge, Layers, Shield } from "lucide-react";
 import { calculateMetrics, countBy, topServices } from "@/lib/helpers";
 import { useWorkspace } from "./workspace-provider";
-import { EmptyState, LiveBanner, MetricCard, Panel, PanelHeader } from "./ui";
+import { EmptyState, MetricCard, Panel, PanelHeader } from "./ui";
 import { StatBars } from "./shared-components";
 
 export function AnalyticsPage() {
@@ -15,8 +15,7 @@ export function AnalyticsPage() {
 
   return (
     <div className="page-stack">
-      <LiveBanner />
-      <section className="metric-grid">
+            <section className="metric-grid">
         <MetricCard label="Tracked Services" value={String(serviceStats.length)} icon={<Layers size={20} />} />
         <MetricCard label="Monthly Cost" value={`$${metrics.monthlyCost}`} icon={<Activity size={20} />} />
         <MetricCard label="Prod Keys" value={String(envStats.Production ?? 0)} icon={<Shield size={20} />} />

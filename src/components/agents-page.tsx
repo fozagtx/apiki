@@ -2,7 +2,7 @@
 
 import { Bot, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button, EmptyState, LiveBanner, Panel, PanelHeader } from "./ui";
+import { Button, EmptyState, Field, Panel, PanelHeader } from "./ui";
 
 type Agent = {
   id: string;
@@ -15,43 +15,56 @@ type Agent = {
 export function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
 
   const loadAgents = async () => {
-    const res = await fetch("/api/agents");
-    const data = await res.json();
-    setAgents(data.agents || []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/agents");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load agents.");
+      setAgents(data.agents || []);
+      setError("");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not load agents.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadAgents();
+    void loadAgents();
   }, []);
 
   const createAgent = async () => {
     if (!newName.trim()) return;
-    await fetch("/api/agents", {
+    setError("");
+    const res = await fetch("/api/agents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName, description: newDesc }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(typeof data.error === "string" ? data.error : "Could not create agent.");
+      return;
+    }
     setNewName("");
     setNewDesc("");
     setShowCreate(false);
-    loadAgents();
+    await loadAgents();
   };
 
   const deleteAgent = async (id: string) => {
     if (!confirm("Delete this agent?")) return;
     await fetch(`/api/agents?id=${id}`, { method: "DELETE" });
-    loadAgents();
+    await loadAgents();
   };
 
   return (
     <div className="page-stack">
-      <LiveBanner />
       <Panel>
         <PanelHeader
           icon={<Bot size={18} />}
@@ -65,15 +78,17 @@ export function AgentsPage() {
 
         {showCreate && (
           <div className="form-grid" style={{ marginBottom: 20 }}>
-            <input
-              className="input"
-              placeholder="Agent name (e.g., Cline, Codex)"
+            <Field
+              id="agent-name"
+              label="Agent name"
+              placeholder="e.g. codex, cursor"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
-            <input
-              className="input"
-              placeholder="Description (optional)"
+            <Field
+              id="agent-description"
+              label="Description"
+              placeholder="Optional"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
             />
@@ -83,6 +98,8 @@ export function AgentsPage() {
             </div>
           </div>
         )}
+
+        {error ? <p className="dialog-error">{error}</p> : null}
 
         {loading ? (
           <p>Loading agents...</p>
@@ -98,6 +115,7 @@ export function AgentsPage() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Agent ID</th>
                   <th>Description</th>
                   <th>Status</th>
                   <th>Created</th>
@@ -108,8 +126,9 @@ export function AgentsPage() {
                 {agents.map((agent) => (
                   <tr key={agent.id}>
                     <td><strong>{agent.name}</strong></td>
+                    <td><code>{agent.id}</code></td>
                     <td>{agent.description || "—"}</td>
-                    <td><span className={`badge badge-status-${agent.status}`}>{agent.status}</span></td>
+                    <td>{agent.status}</td>
                     <td>{new Date(agent.createdAt).toLocaleDateString()}</td>
                     <td>
                       <Button icon={<Trash2 size={14} />} onClick={() => deleteAgent(agent.id)} size="sm" variant="danger">
@@ -125,18 +144,26 @@ export function AgentsPage() {
       </Panel>
 
       <Panel>
-        <PanelHeader icon={<Bot size={18} />} title="MCP Connection" />
+        <PanelHeader icon={<Bot size={18} />} title="Connect a key to an agent" />
+        <ol className="plain-steps">
+          <li>Add an API key under <strong>Keys</strong> for a service (e.g. github).</li>
+          <li>Add an agent here (name becomes the agent id, e.g. codex).</li>
+          <li>Open <strong>Policies</strong> → allow that agent on that service.</li>
+          <li>Point the agent at Apiki with the same agent id + your passphrase.</li>
+        </ol>
+        <p className="plain-note">
+          You do not attach a key to an agent directly. Keys belong to a service. Agents get access through a policy for that service.
+        </p>
         <div className="code-block">
           <code>
-{`// .cline/mcp.json
-{
+{`{
   "mcpServers": {
     "apiki": {
-      "command": "npx",
-      "args": ["-y", "apiki-mcp-server"],
+      "command": "node",
+      "args": ["/Users/kaizen/Desktop/apiki/packages/mcp-server/dist/index.js"],
       "env": {
-        "APIKI_BASE_URL": "http://localhost:5173",
-        "APIKI_AGENT_ID": "YOUR_AGENT_ID",
+        "APIKI_BASE_URL": "http://localhost:8787",
+        "APIKI_AGENT_ID": "codex",
         "APIKI_PASSPHRASE": "your-workspace-passphrase"
       }
     }
@@ -144,9 +171,6 @@ export function AgentsPage() {
 }`}
           </code>
         </div>
-        <p style={{ marginTop: 12, fontSize: 14, color: "var(--muted)" }}>
-          Replace YOUR_AGENT_ID with an agent ID from the list above, and use your workspace passphrase.
-        </p>
       </Panel>
     </div>
   );

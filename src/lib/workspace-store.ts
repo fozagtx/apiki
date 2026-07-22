@@ -170,9 +170,11 @@ export function validateWorkspace(value: WorkspacePayload): WorkspacePayload {
     throw new Error("Workspace payload is invalid.");
   }
 
-  if (!value.meta?.workspaceName || !value.meta?.ownerEmail || !value.meta?.createdAt) {
+  if (!value.meta?.workspaceName || !value.meta?.createdAt) {
     throw new Error("Workspace metadata is invalid.");
   }
+
+  value.meta.ownerEmail = value.meta.ownerEmail ?? "";
 
   if (!Array.isArray(value.records)) {
     throw new Error("Workspace records are invalid.");

@@ -4,12 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev --hostname 0.0.0.0 --port 5173",
+    "dev": "next dev --hostname 0.0.0.0 --port 8787",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "build": "npm run db:generate && next build",
-    "start": "next start --hostname 0.0.0.0 --port 5173"
+    "start": "next start --hostname 0.0.0.0 --port 8787"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { decryptString } from "@/lib/crypto";
 import { ENVIRONMENTS, type Environment, type WorkspaceEnvelope, type WorkspaceRecord } from "@/lib/types";
 import { useWorkspace } from "./workspace-provider";
-import { Button, EmptyState, IconButton, LiveBanner, Panel } from "./ui";
+import { Button, EmptyState, IconButton, Panel } from "./ui";
 import { KeyTable } from "./shared-components";
 
 export function KeysPage({ onAddKey }: { onAddKey: () => void }) {
@@ -46,10 +46,10 @@ export function KeysPage({ onAddKey }: { onAddKey: () => void }) {
   };
 
   const deleteRecord = (record: WorkspaceRecord) => {
-    const confirmed = window.confirm(`Delete ${record.service} / ${record.name}? This removes the encrypted record from Neon.`);
+    const confirmed = window.confirm(`Delete ${record.service} / ${record.name}? This removes the encrypted record from SQLite.`);
     if (!confirmed) return;
     updateWorkspace((current) => ({ ...current, records: current.records.filter((item) => item.id !== record.id) }));
-    setToast("Encrypted record deleted from Neon");
+    setToast("Encrypted record deleted from SQLite");
   };
 
   const markRotated = (record: WorkspaceRecord) => {
@@ -68,7 +68,6 @@ export function KeysPage({ onAddKey }: { onAddKey: () => void }) {
 
   return (
     <div className="page-stack">
-      <LiveBanner />
       <Panel>
         <div className="table-toolbar">
           <div className="search-field">
@@ -98,8 +97,8 @@ export function KeysPage({ onAddKey }: { onAddKey: () => void }) {
                   <tr key={record.id}>
                     <td><strong>{record.service}</strong><small>{record.name}</small></td>
                     <td><code>{revealed[record.id] ? revealed[record.id] : `${record.service.toLowerCase().replace(/[^a-z]/g, "").slice(0, 2) || "sk"}-\u2022\u2022\u2022\u2022\u2022\u2022\u2022${record.id.slice(-4)}`}</code></td>
-                    <td><span className={`badge badge-env-${record.environment.toLowerCase()}`}>{record.environment}</span></td>
-                    <td><span className={`badge badge-status-${record.status}`}>{record.status}</span></td>
+                    <td>{record.environment}</td>
+                    <td>{record.status}</td>
                     <td>{record.owner}</td>
                     <td>
                       <div className="row-actions">

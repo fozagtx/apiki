@@ -1,4 +1,4 @@
-import { DatabaseZap, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
@@ -165,21 +165,6 @@ export function EmptyState({
           {actionLabel}
         </Button>
       ) : null}
-    </div>
-  );
-}
-
-export function LiveBanner({
-  children = "Live workspace: encrypted records are stored in Neon. Provider alerts and team auth are not connected yet.",
-  icon = <DatabaseZap size={18} />,
-}: {
-  children?: ReactNode;
-  icon?: ReactNode;
-}) {
-  return (
-    <div className="live-banner">
-      {icon}
-      <span>{children}</span>
     </div>
   );
 }

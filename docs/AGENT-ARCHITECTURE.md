@@ -2,7 +2,7 @@
 
 ## The Problem
 
-AI coding agents (Cline, Codex, Cursor, etc.) need API keys to:
+AI coding agents (Codex, Cursor, etc.) need API keys to:
 - Call external APIs (deploy, monitor, fetch data)
 - Run CLI tools that require auth
 - Execute build/deploy scripts
@@ -273,7 +273,7 @@ type AccessPolicy = {
 // Example policies
 const policies: AccessPolicy[] = [
   {
-    agent_id: "cline",
+    agent_id: "codex",
     service: "vercel",
     allowed_methods: ["GET"],
     allowed_paths: ["/v9/projects", "/v9/deployments"],
@@ -281,7 +281,7 @@ const policies: AccessPolicy[] = [
     require_approval_above: 0,  // Read-only, no approval needed
   },
   {
-    agent_id: "cline",
+    agent_id: "codex",
     service: "vercel",
     allowed_methods: ["POST"],
     allowed_paths: ["/v9/deployments"],
@@ -321,8 +321,8 @@ type AuditEntry = {
 
 // Example audit log
 [
-  { timestamp: "22:15:03", agent: "cline", service: "vercel", action: "api_call", method: "GET", path: "/v9/projects", status: "allowed" },
-  { timestamp: "22:15:07", agent: "cline", service: "vercel", action: "api_call", method: "POST", path: "/v9/deployments", status: "allowed" },
+  { timestamp: "22:15:03", agent: "codex", service: "vercel", action: "api_call", method: "GET", path: "/v9/projects", status: "allowed" },
+  { timestamp: "22:15:07", agent: "codex", service: "vercel", action: "api_call", method: "POST", path: "/v9/deployments", status: "allowed" },
   { timestamp: "22:16:01", agent: "codex", service: "stripe", action: "api_call", method: "DELETE", path: "/v1/products/prod_xxx", status: "denied" },
 ]
 ```
@@ -345,7 +345,7 @@ type AuditEntry = {
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  Agent: Cline                                    │
+│  Agent: Codex                                    │
 │  Status: ● Connected (via MCP)                   │
 │                                                  │
 │  Access Policies:                                │
@@ -455,7 +455,7 @@ const result = await mcp.call("call_api", {
 ## Connection Setup
 
 ```jsonc
-// .cline/mcp.json (or equivalent agent config)
+// .codex/config.toml or MCP config (or equivalent agent config)
 {
   "mcpServers": {
     "apiki": {

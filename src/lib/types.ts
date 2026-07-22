@@ -72,7 +72,7 @@ export const ENVIRONMENTS: Environment[] = ["Production", "Staging", "Developmen
 export const STATUSES: KeyStatus[] = ["active", "inactive", "rotating", "revoked"];
 
 export const emptyForm: NewKeyForm = {
-  service: "",
+  service: "openai",
   name: "",
   apiKey: "",
   environment: "Production",

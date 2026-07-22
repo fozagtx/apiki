@@ -38,7 +38,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         onCreate={async (record) => {
           await updateWorkspace(
             (current) => ({ ...current, records: [record, ...current.records] }),
-            "API key encrypted and saved to Neon",
+            "API key encrypted and saved to SQLite",
           );
           setAddOpen(false);
           router.push("/keys");

@@ -44,10 +44,10 @@ function KeyRow({ compact, record }: { compact?: boolean; record: WorkspaceRecor
         <code>{maskSecret(record)}</code>
       </td>
       <td>
-        <span className={`badge badge-env-${record.environment.toLowerCase()}`}>{record.environment}</span>
+        {record.environment}
       </td>
       <td>
-        <span className={`badge badge-status-${record.status}`}>{record.status}</span>
+        {record.status}
       </td>
       <td>{record.owner}</td>
       <td>{formatDate(record.lastRotatedAt)}</td>

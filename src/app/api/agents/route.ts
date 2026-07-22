@@ -20,17 +20,39 @@ export async function GET() {
   });
 }
 
+function agentSlug(name: string) {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "agent";
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, id: requestedId } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    const id = typeof requestedId === "string" && requestedId.trim()
+      ? agentSlug(requestedId)
+      : agentSlug(name);
+
+    const existing = await prisma.agent.findUnique({ where: { id } });
+    if (existing) {
+      return NextResponse.json(
+        { error: `Agent id "${id}" already exists. Use a different name.` },
+        { status: 409 },
+      );
+    }
+
     const agent = await prisma.agent.create({
       data: {
+        id,
         name,
         description: description || "",
       },

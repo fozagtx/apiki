@@ -37,12 +37,10 @@ export async function decryptString(key: CryptoKey, ivBase64: string, cipherText
 
 export async function createWorkspace({
   workspaceName,
-  ownerEmail,
   passphrase,
   records,
 }: {
   workspaceName: string;
-  ownerEmail: string;
   passphrase: string;
   records: WorkspaceRecord[];
 }) {
@@ -55,7 +53,7 @@ export async function createWorkspace({
     verifier,
     meta: {
       workspaceName,
-      ownerEmail,
+      ownerEmail: "",
       createdAt: new Date().toISOString(),
     },
     records,

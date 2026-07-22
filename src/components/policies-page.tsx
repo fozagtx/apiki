@@ -2,7 +2,7 @@
 
 import { Shield, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button, EmptyState, LiveBanner, Panel, PanelHeader } from "./ui";
+import { Button, EmptyState, Field, Panel, PanelHeader, SelectField } from "./ui";
 
 type Agent = { id: string; name: string };
 type Policy = {
@@ -19,62 +19,77 @@ export function PoliciesPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({
     agentId: "",
     service: "",
     allowedMethods: "*",
-    allowedPaths: "/*",
+    allowedPaths: "*",
     maxRequestsPerHour: "60",
     requireApprovalAbove: "0",
   });
 
   const loadData = async () => {
-    const [agentsRes, policiesRes] = await Promise.all([
-      fetch("/api/agents"),
-      fetch("/api/policies"),
-    ]);
-    const agentsData = await agentsRes.json();
-    const policiesData = await policiesRes.json();
-    setAgents(agentsData.agents || []);
-    setPolicies(policiesData.policies || []);
-    setLoading(false);
+    try {
+      const [agentsRes, policiesRes] = await Promise.all([
+        fetch("/api/agents"),
+        fetch("/api/policies"),
+      ]);
+      const agentsData = await agentsRes.json();
+      const policiesData = await policiesRes.json();
+      if (!agentsRes.ok) throw new Error(agentsData.error || "Could not load agents.");
+      if (!policiesRes.ok) throw new Error(policiesData.error || "Could not load policies.");
+      setAgents(agentsData.agents || []);
+      setPolicies(policiesData.policies || []);
+      setError("");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not load policies.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, []);
 
   const createPolicy = async () => {
     if (!form.agentId || !form.service) return;
-    await fetch("/api/policies", {
+    setError("");
+    const res = await fetch("/api/policies", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         agentId: form.agentId,
-        service: form.service,
-        allowedMethods: form.allowedMethods.split(",").map((m) => m.trim()),
-        allowedPaths: form.allowedPaths.split(",").map((p) => p.trim()),
-        maxRequestsPerHour: parseInt(form.maxRequestsPerHour),
-        requireApprovalAbove: parseFloat(form.requireApprovalAbove),
+        service: form.service.trim().toLowerCase(),
+        allowedMethods: form.allowedMethods.split(",").map((m) => m.trim()).filter(Boolean),
+        allowedPaths: form.allowedPaths.split(",").map((p) => p.trim()).filter(Boolean),
+        maxRequestsPerHour: parseInt(form.maxRequestsPerHour, 10) || 60,
+        requireApprovalAbove: parseFloat(form.requireApprovalAbove) || 0,
       }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(typeof data.error === "string" ? data.error : "Could not create policy.");
+      return;
+    }
     setShowCreate(false);
     setForm({
       agentId: "",
       service: "",
       allowedMethods: "*",
-      allowedPaths: "/*",
+      allowedPaths: "*",
       maxRequestsPerHour: "60",
       requireApprovalAbove: "0",
     });
-    loadData();
+    await loadData();
   };
 
   const deletePolicy = async (id: string) => {
     if (!confirm("Delete this policy?")) return;
     await fetch(`/api/policies?id=${id}`, { method: "DELETE" });
-    loadData();
+    await loadData();
   };
 
   const getAgentName = (agentId: string) => {
@@ -83,7 +98,6 @@ export function PoliciesPage() {
 
   return (
     <div className="page-stack">
-      <LiveBanner />
       <Panel>
         <PanelHeader
           icon={<Shield size={18} />}
@@ -97,46 +111,50 @@ export function PoliciesPage() {
 
         {showCreate && (
           <div className="form-grid" style={{ marginBottom: 20 }}>
-            <select
-              className="input"
+            <SelectField
+              id="policy-agent"
+              label="Agent"
               value={form.agentId}
               onChange={(e) => setForm({ ...form, agentId: e.target.value })}
             >
               <option value="">Select agent...</option>
               {agents.map((a) => (
-                <option key={a.id} value={a.id}>{a.name}</option>
+                <option key={a.id} value={a.id}>{a.name} ({a.id})</option>
               ))}
-            </select>
-            <input
-              className="input"
-              placeholder="Service (e.g., vercel, openai)"
+            </SelectField>
+            <Field
+              id="policy-service"
+              label="Service"
+              placeholder="e.g. vercel, openai, github"
               value={form.service}
               onChange={(e) => setForm({ ...form, service: e.target.value })}
             />
-            <input
-              className="input"
-              placeholder="Methods (comma-separated, e.g., GET,POST or *)"
+            <Field
+              id="policy-methods"
+              label="Methods"
+              placeholder="GET,POST or *"
               value={form.allowedMethods}
               onChange={(e) => setForm({ ...form, allowedMethods: e.target.value })}
             />
-            <input
-              className="input"
-              placeholder="Paths (comma-separated, e.g., /v9/* or *)"
+            <Field
+              id="policy-paths"
+              label="Paths"
+              placeholder="/v9/* or *"
               value={form.allowedPaths}
               onChange={(e) => setForm({ ...form, allowedPaths: e.target.value })}
             />
-            <input
-              className="input"
+            <Field
+              id="policy-rate"
+              label="Max requests/hour"
               type="number"
-              placeholder="Max requests/hour"
               value={form.maxRequestsPerHour}
               onChange={(e) => setForm({ ...form, maxRequestsPerHour: e.target.value })}
             />
-            <input
-              className="input"
+            <Field
+              id="policy-approval"
+              label="Require approval above $"
               type="number"
               step="0.01"
-              placeholder="Require approval above $"
               value={form.requireApprovalAbove}
               onChange={(e) => setForm({ ...form, requireApprovalAbove: e.target.value })}
             />
@@ -146,6 +164,8 @@ export function PoliciesPage() {
             </div>
           </div>
         )}
+
+        {error ? <p className="dialog-error">{error}</p> : null}
 
         {loading ? (
           <p>Loading policies...</p>
@@ -172,7 +192,7 @@ export function PoliciesPage() {
                 {policies.map((policy) => (
                   <tr key={policy.id}>
                     <td><strong>{getAgentName(policy.agentId)}</strong></td>
-                    <td><span className="badge badge-env-production">{policy.service}</span></td>
+                    <td>{policy.service}</td>
                     <td>{policy.allowedMethods.join(", ")}</td>
                     <td><code style={{ fontSize: 12 }}>{policy.allowedPaths.join(", ")}</code></td>
                     <td>{policy.maxRequestsPerHour}/hr</td>

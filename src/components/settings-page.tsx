@@ -4,7 +4,7 @@ import { Clipboard, DatabaseZap, Lock, Shield, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDate } from "@/lib/helpers";
 import { useWorkspace } from "./workspace-provider";
-import { Button, LiveBanner, Panel, PanelHeader, StatusLine } from "./ui";
+import { Button, Panel, PanelHeader, StatusLine } from "./ui";
 
 export function SettingsPage() {
   const { workspace, lockWorkspace, resetWorkspaceAction, setToast } = useWorkspace();
@@ -50,13 +50,11 @@ export function SettingsPage() {
 
   return (
     <div className="page-stack">
-      <LiveBanner />
-      <section className="split-grid">
+            <section className="split-grid">
         <Panel>
           <PanelHeader icon={<DatabaseZap size={18} />} title="Workspace Details" />
           <div className="status-list">
             <StatusLine icon={<Shield size={18} />} label="Workspace name" value={workspace!.meta.workspaceName} />
-            <StatusLine icon={<Clipboard size={18} />} label="Owner" value={workspace!.meta.ownerEmail} />
             <StatusLine icon={<DatabaseZap size={18} />} label="Created" value={formatDate(workspace!.meta.createdAt)} />
             <StatusLine icon={<Lock size={18} />} label="Encrypted records" value={String(workspace!.records.length)} />
           </div>
@@ -68,7 +66,7 @@ export function SettingsPage() {
             <Button icon={<Clipboard size={18} />} onClick={exportMetadata} variant="secondary">Export Metadata</Button>
             <Button icon={<Trash2 size={18} />} onClick={handleReset} variant="danger">Reset Workspace</Button>
           </div>
-          <p className="settings-note">Metadata export excludes decrypted API key values. Reset removes the encrypted workspace records from Neon.</p>
+          <p className="settings-note">Metadata export excludes decrypted API key values. Reset removes the encrypted workspace records from SQLite.</p>
         </Panel>
       </section>
     </div>

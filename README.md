@@ -19,7 +19,7 @@ Setup guide: [INSTALL.md](INSTALL.md)
 
 ## What it does
 
-You have API keys for Vercel, OpenAI, GitHub, etc. You want AI agents (Cline, Codex, Cursor) to use those keys without actually seeing them. Apiki sits in the middle:
+You have API keys for Vercel, OpenAI, GitHub, etc. You want AI agents (Codex, Cursor) to use those keys without actually seeing them. Apiki sits in the middle:
 
 1. You encrypt your API keys with a passphrase
 2. Agents call Apiki's proxy instead of calling APIs directly

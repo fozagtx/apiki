@@ -30,7 +30,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [workspace, setWorkspace] = useState<WorkspaceEnvelope | null>(null);
   const [cryptoKey, setCryptoKey] = useState<CryptoKey | null>(null);
   const [isWorkspaceLoading, setWorkspaceLoading] = useState(true);
-  const [apiStatus, setApiStatus] = useState<LiveStatus>({ state: "loading", message: "Connecting to Neon..." });
+  const [apiStatus, setApiStatus] = useState<LiveStatus>({ state: "loading", message: "Connecting to SQLite..." });
   const [isAddOpen, setAddOpen] = useState(false);
   const [toast, setToast] = useState("");
 
@@ -61,7 +61,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const persistWorkspace = useCallback(async (nextWorkspace: WorkspaceEnvelope, successMessage?: string) => {
     const savedWorkspace = await saveWorkspace(nextWorkspace);
     setWorkspace(savedWorkspace ?? nextWorkspace);
-    setApiStatus({ state: "ready", message: "Neon database connected." });
+    setApiStatus({ state: "ready", message: "SQLite database connected." });
     if (successMessage) setToast(successMessage);
     return savedWorkspace ?? nextWorkspace;
   }, []);
@@ -91,7 +91,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetWorkspaceAction = useCallback(async () => {
-    const confirmed = window.confirm("Reset the live workspace? This removes encrypted records from Neon.");
+    const confirmed = window.confirm("Reset the live workspace? This removes encrypted records from SQLite.");
     if (!confirmed) return;
     try {
       await deleteWorkspace();

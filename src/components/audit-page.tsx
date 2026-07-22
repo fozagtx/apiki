@@ -2,7 +2,7 @@
 
 import { ScrollText } from "lucide-react";
 import { useEffect, useState } from "react";
-import { EmptyState, LiveBanner, Panel, PanelHeader } from "./ui";
+import { EmptyState, Panel, PanelHeader } from "./ui";
 
 type AuditEntry = {
   id: string;
@@ -26,40 +26,11 @@ export function AuditPage() {
       setLogs(data.logs || []);
       setLoading(false);
     };
-    loadLogs();
+    void loadLogs();
   }, []);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "allowed":
-        return "badge-status-active";
-      case "denied":
-        return "badge-status-revoked";
-      case "approved":
-        return "badge-status-rotating";
-      default:
-        return "";
-    }
-  };
-
-  const getActionIcon = (action: string) => {
-    switch (action) {
-      case "api_call":
-        return "🌐";
-      case "command_exec":
-        return "⚡";
-      case "env_inject":
-        return "🔑";
-      case "token_create":
-        return "🎟️";
-      default:
-        return "📝";
-    }
-  };
 
   return (
     <div className="page-stack">
-      <LiveBanner />
       <Panel>
         <PanelHeader icon={<ScrollText size={18} />} title="Access Audit Log" />
 
@@ -92,18 +63,11 @@ export function AuditPage() {
                       {new Date(entry.timestamp).toLocaleString()}
                     </td>
                     <td><strong>{entry.agentId}</strong></td>
-                    <td>
-                      <span style={{ marginRight: 6 }}>{getActionIcon(entry.action)}</span>
-                      {entry.action}
-                    </td>
-                    <td><span className="badge badge-env-production">{entry.service}</span></td>
+                    <td>{entry.action}</td>
+                    <td>{entry.service}</td>
                     <td>{entry.method || "—"}</td>
                     <td><code style={{ fontSize: 12 }}>{entry.path || "—"}</code></td>
-                    <td>
-                      <span className={`badge ${getStatusColor(entry.status)}`}>
-                        {entry.status}
-                      </span>
-                    </td>
+                    <td>{entry.status}</td>
                   </tr>
                 ))}
               </tbody>

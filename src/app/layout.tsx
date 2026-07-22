@@ -4,7 +4,7 @@ import "../styles.css";
 
 export const metadata: Metadata = {
   title: "Apiki",
-  description: "Live encrypted API key workspace backed by Neon.",
+  description: "Live encrypted API key workspace backed by SQLite.",
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png", sizes: "512x512" },

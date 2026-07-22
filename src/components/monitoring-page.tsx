@@ -4,7 +4,7 @@ import { Bell, MonitorCheck, ShieldAlert } from "lucide-react";
 import { buildMonitoringChecks } from "@/lib/helpers";
 import type { MonitoringPrefs } from "@/lib/types";
 import { useWorkspace } from "./workspace-provider";
-import { EmptyState, IconButton, LiveBanner, Panel, PanelHeader } from "./ui";
+import { EmptyState, IconButton, Panel, PanelHeader } from "./ui";
 import { AlertItem } from "./shared-components";
 
 export function MonitoringPage() {
@@ -20,8 +20,7 @@ export function MonitoringPage() {
 
   return (
     <div className="page-stack">
-      <LiveBanner />
-      <section className="split-grid">
+            <section className="split-grid">
         <Panel>
           <PanelHeader icon={<MonitorCheck size={18} />} title="Workspace Risk Checks" />
           {checks.length ? (

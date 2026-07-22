@@ -26,7 +26,7 @@ export default function LoginPage() {
         apiStatus={apiStatus}
         workspace={workspace}
         onCreate={async (nextWorkspace, key) => {
-          await persistWorkspace(nextWorkspace, "Encrypted workspace created in Neon");
+          await persistWorkspace(nextWorkspace, "Encrypted workspace created in SQLite");
           setCryptoKey(key);
           router.push("/dashboard");
         }}

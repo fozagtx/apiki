@@ -4,7 +4,7 @@ import { AlertTriangle, BarChart3, KeyRound, RefreshCw, Shield, WalletCards, Zap
 import { useMemo } from "react";
 import { calculateMetrics, formatDate, recordsDueForRotation } from "@/lib/helpers";
 import { useWorkspace } from "./workspace-provider";
-import { Button, EmptyState, LiveBanner, MetricCard, Panel, PanelHeader } from "./ui";
+import { Button, EmptyState, MetricCard, Panel, PanelHeader } from "./ui";
 import { AlertItem, EmptyRows, KeyTable, MiniChart } from "./shared-components";
 
 export function DashboardPage({ onAddKey }: { onAddKey: () => void }) {
@@ -15,8 +15,7 @@ export function DashboardPage({ onAddKey }: { onAddKey: () => void }) {
 
   return (
     <div className="page-stack">
-      <LiveBanner />
-      <section className="metric-grid">
+            <section className="metric-grid">
         <MetricCard label="Total API Keys" value={String(workspace!.records.length)} icon={<KeyRound size={20} />} />
         <MetricCard label="Active Keys" value={String(metrics.active)} icon={<Zap size={20} />} />
         <MetricCard label="Due Rotations" value={String(metrics.rotationDue)} icon={<RefreshCw size={20} />} />

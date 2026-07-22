@@ -57,11 +57,11 @@ export function AppShell({ children, currentPath }: { children: ReactNode; curre
         <div className="sidebar-footer">
           <div className="sidebar-user">
             <div className="user-avatar">
-              {workspace?.meta.ownerEmail.slice(0, 2).toUpperCase() ?? "??"}
+              {(workspace?.meta.workspaceName ?? "WS").slice(0, 2).toUpperCase()}
             </div>
             <div>
               <strong>{workspace?.meta.workspaceName ?? "Workspace"}</strong>
-              <small>{workspace?.meta.ownerEmail ?? ""}</small>
+              <small>Locked with passphrase</small>
             </div>
           </div>
           <Button icon={<LogOut size={16} />} onClick={lockWorkspace} size="sm" variant="ghost">
@@ -73,7 +73,7 @@ export function AppShell({ children, currentPath }: { children: ReactNode; curre
         <header className="app-header">
           <div>
             <h1>{getPageTitle(currentPath)}</h1>
-            <p>Encrypted workspace backed by Neon</p>
+            <p>Encrypted workspace backed by SQLite</p>
           </div>
           <div className="header-actions">
             <IconButton label="No provider notifications are not connected yet">

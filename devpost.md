@@ -23,7 +23,7 @@ Apiki helps users manage:
 
 ### For AI Agents
 
-Apiki acts as a **secret broker** — AI agents (Cline, Codex, Cursor, etc.) access APIs through Apiki's proxy without ever seeing raw keys:
+Apiki acts as a **secret broker** — AI agents (Codex, Cursor, etc.) access APIs through Apiki's proxy without ever seeing raw keys:
 
 - **MCP Server** — Agents connect via Model Context Protocol and call APIs through Apiki's tools
 - **Proxy Gateway** — HTTP proxy at `/api/proxy/[...path]` decrypts keys server-side, injects them into requests, forwards to real APIs, returns only the response

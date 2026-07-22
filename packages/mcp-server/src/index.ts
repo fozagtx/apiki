@@ -9,7 +9,7 @@ import {
 import { z } from "zod";
 
 // Configuration from environment
-const APIKI_BASE_URL = process.env.APIKI_BASE_URL || "http://localhost:5173";
+const APIKI_BASE_URL = process.env.APIKI_BASE_URL || "http://localhost:8787";
 const APIKI_AGENT_ID = process.env.APIKI_AGENT_ID || "mcp-agent";
 const APIKI_PASSPHRASE = process.env.APIKI_PASSPHRASE || "";
 

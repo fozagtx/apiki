@@ -5,7 +5,7 @@
 - **Operating Systems:** macOS, Linux, Windows (WSL recommended)
 - **Node.js:** v18.17.0 or higher (LTS recommended)
 - **Browsers:** Chrome 90+, Firefox 88+, Safari 15+, Edge 90+ (for Web Crypto API support)
-- **Agents:** Cline, Codex, Cursor, Continue, Grok, or any MCP-compatible agent
+- **Agents:** Codex, Cursor, Continue, Grok, or any MCP-compatible agent
 
 ## Prerequisites
 
@@ -50,26 +50,9 @@ Your API key is now encrypted with AES-256-GCM using PBKDF2 key derivation (210,
 
 ## Step 3: Configure Your Agent
 
-### Option A: MCP Server (Recommended for Cline, Codex, Cursor)
+### Option A: MCP Server (Recommended for Codex, Cursor)
 
 Edit your agent's MCP configuration file:
-
-**For Cline** (`~/.cline/mcp_settings.json`):
-```json
-{
-  "mcpServers": {
-    "apiki": {
-      "command": "node",
-      "args": ["/absolute/path/to/apiki/packages/mcp-server/dist/index.js"],
-      "env": {
-        "APIKI_BASE_URL": "http://localhost:5173",
-        "APIKI_AGENT_ID": "cline",
-        "APIKI_PASSPHRASE": "your-workspace-passphrase"
-      }
-    }
-  }
-}
-```
 
 **For Codex** (`~/.codex/config.json`):
 ```json
@@ -128,11 +111,11 @@ The proxy will:
 Create policies to control what each agent can do:
 
 ```bash
-# Allow Cline to read Vercel projects (GET only)
+# Allow Codex to read Vercel projects (GET only)
 curl -X POST http://localhost:5173/api/policies \
   -H "Content-Type: application/json" \
   -d '{
-    "agentId": "cline",
+    "agentId": "codex",
     "service": "vercel",
     "allowedMethods": ["GET"],
     "allowedPaths": ["/v9/projects", "/v9/projects/*"],
@@ -192,7 +175,7 @@ Expected response:
 
 ### Test an Agent Call (via MCP)
 
-In your agent (Cline, Codex, etc.), try:
+In your agent (Codex, Cursor, etc.), try:
 ```
 Use Apiki to list my Vercel projects
 ```

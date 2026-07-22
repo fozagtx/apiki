@@ -2,13 +2,10 @@
 
 import {
   ArrowRight,
-  BarChart3,
   Bot,
-  CloudOff,
   DatabaseZap,
   KeyRound,
   LockKeyhole,
-  RefreshCw,
   Shield,
   UnlockKeyhole,
 } from "lucide-react";
@@ -42,19 +39,10 @@ export function LandingPage({
       <main>
         <section className="hero-section">
           <div className="hero-copy">
-            <div className="eyebrow">
-              <Shield size={16} />
-              Encrypted API key workspace + secret broker for AI agents
-            </div>
             <h1>API keys, encrypted and agent-ready</h1>
             <p>
-              Store keys in Neon with client-side encryption. Let AI agents call APIs without ever seeing credentials.
+              Store keys in SQLite with client-side encryption. Let AI agents call APIs without ever seeing credentials.
             </p>
-            <div className="hero-chips" aria-label="Apiki assurances">
-              <span>AES-GCM encryption</span>
-              <span>MCP server for agents</span>
-              <span>Policy-controlled proxy</span>
-            </div>
             <div className="hero-actions">
               <a href="/login" className="button button-primary button-lg">Start Secure Workspace <ArrowRight size={18} /></a>
               <a href="/login" className="button button-secondary button-lg">View Demo</a>
@@ -69,7 +57,7 @@ export function LandingPage({
                 </IconTile>
                 <div>
                   <strong>Live Workspace Status</strong>
-                  <small>State from Neon and this browser session</small>
+                  <small>State from SQLite and this browser session</small>
                 </div>
               </div>
               <div className="status-list">
@@ -91,7 +79,7 @@ export function LandingPage({
             <h2>Manage keys yourself or let agents use them securely.</h2>
           </div>
           <div className="feature-grid">
-            <ActionCard icon={<LockKeyhole size={20} />} title="Encrypt" body="Passphrase-derived AES-GCM encryption. Keys encrypted in your browser before reaching Neon." />
+            <ActionCard icon={<LockKeyhole size={20} />} title="Encrypt" body="Passphrase-derived AES-GCM encryption. Keys encrypted in your browser before reaching SQLite." />
             <ActionCard icon={<Bot size={20} />} title="Agent Proxy" body="AI agents call APIs through the proxy. Keys decrypted server-side, never exposed to agents." />
             <ActionCard icon={<Shield size={20} />} title="Policy Control" body="Per-agent rules for services, methods, paths, and rate limits. Every access logged." />
           </div>

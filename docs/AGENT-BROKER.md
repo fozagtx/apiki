@@ -91,12 +91,12 @@ npm run dev
 
 ### 2. Create an Agent
 
-Go to `/agents` in the app, create an agent (e.g., "Cline").
+Go to `/agents` in the app, create an agent (e.g., "Codex").
 
 ### 3. Configure Policies
 
 Go to `/policies`, create rules for the agent:
-- Agent: Cline
+- Agent: Codex
 - Service: vercel
 - Methods: GET, POST
 - Paths: /v9/*
@@ -104,7 +104,7 @@ Go to `/policies`, create rules for the agent:
 
 ### 4. Connect Agent
 
-Add to your agent's MCP config (e.g., `.cline/mcp.json`):
+Add to your agent's MCP config (e.g., `.codex/config.toml or MCP config`):
 
 ```json
 {
