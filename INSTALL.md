@@ -32,13 +32,13 @@ npm run db:push
 npm run dev
 ```
 
-Apiki will be running at `http://localhost:5173`
+Apiki will be running at `http://localhost:8787`
 
 ## Step 2: Create Your Workspace
 
-1. Open `http://localhost:5173` in your browser
-2. Click "Create Workspace"
-3. Enter a **strong passphrase** (you'll need this to unlock your workspace)
+1. Open `http://localhost:8787` in your browser
+2. Create a workspace (name + passphrase)
+3. Enter a passphrase (needed to unlock later)
 4. Add your first API key:
    - Service: e.g., "vercel", "openai", "github"
    - Name: e.g., "Production Vercel Token"
@@ -46,7 +46,7 @@ Apiki will be running at `http://localhost:5173`
    - Environment: Production/Staging/Development
 5. Click "Save"
 
-Your API key is now encrypted with AES-256-GCM using PBKDF2 key derivation (210,000 iterations). The plaintext key never touches the server.
+Keys are encrypted in the browser before save. Plaintext never hits the server.
 
 ## Step 3: Configure Your Agent
 
@@ -62,7 +62,7 @@ Edit your agent's MCP configuration file:
       "command": "node",
       "args": ["/absolute/path/to/apiki/packages/mcp-server/dist/index.js"],
       "env": {
-        "APIKI_BASE_URL": "http://localhost:5173",
+        "APIKI_BASE_URL": "http://localhost:8787",
         "APIKI_AGENT_ID": "codex",
         "APIKI_PASSPHRASE": "your-workspace-passphrase"
       }
@@ -79,7 +79,7 @@ Edit your agent's MCP configuration file:
       "command": "node",
       "args": ["/absolute/path/to/apiki/packages/mcp-server/dist/index.js"],
       "env": {
-        "APIKI_BASE_URL": "http://localhost:5173",
+        "APIKI_BASE_URL": "http://localhost:8787",
         "APIKI_AGENT_ID": "cursor",
         "APIKI_PASSPHRASE": "your-workspace-passphrase"
       }
@@ -94,7 +94,7 @@ Your agent can call Apiki's proxy directly:
 
 ```bash
 # Example: Call Vercel API through Apiki proxy
-curl -X GET http://localhost:5173/api/proxy/vercel/v9/projects \
+curl -X GET http://localhost:8787/api/proxy/vercel/v9/projects \
   -H "X-Apiki-Agent: my-agent" \
   -H "X-Apiki-Passphrase: your-workspace-passphrase"
 ```
@@ -112,7 +112,7 @@ Create policies to control what each agent can do:
 
 ```bash
 # Allow Codex to read Vercel projects (GET only)
-curl -X POST http://localhost:5173/api/policies \
+curl -X POST http://localhost:8787/api/policies \
   -H "Content-Type: application/json" \
   -d '{
     "agentId": "codex",
@@ -124,7 +124,7 @@ curl -X POST http://localhost:5173/api/policies \
   }'
 
 # Allow Codex to call OpenAI API (all methods)
-curl -X POST http://localhost:5173/api/policies \
+curl -X POST http://localhost:8787/api/policies \
   -H "Content-Type: application/json" \
   -d '{
     "agentId": "codex",
@@ -141,7 +141,7 @@ curl -X POST http://localhost:5173/api/policies \
 ### Test the Health Check
 
 ```bash
-curl http://localhost:5173/api/health
+curl http://localhost:8787/api/health
 ```
 
 Expected response:
@@ -159,7 +159,7 @@ Expected response:
 
 ```bash
 # List available services
-curl http://localhost:5173/api/services \
+curl http://localhost:8787/api/services \
   -H "X-Apiki-Passphrase: your-workspace-passphrase"
 ```
 
@@ -185,7 +185,7 @@ The agent should call the `list_services` or `call_api` tool, and Apiki will pro
 ### Check the Audit Log
 
 ```bash
-curl "http://localhost:5173/api/audit?limit=10"
+curl "http://localhost:8787/api/audit?limit=10"
 ```
 
 You should see entries for every API call made through the proxy, including:
