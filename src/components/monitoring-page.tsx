@@ -20,7 +20,7 @@ export function MonitoringPage() {
 
   return (
     <div className="page-stack">
-            <section className="split-grid">
+      <section className="split-grid">
         <Panel>
           <PanelHeader icon={<MonitorCheck size={18} />} title="Workspace Risk Checks" />
           {checks.length ? (

@@ -1,10 +1,11 @@
 "use client";
 
 import { AlertTriangle, BarChart3, KeyRound, RefreshCw, Shield, WalletCards, Zap } from "lucide-react";
+import Link from "next/link";
 import { useMemo } from "react";
 import { calculateMetrics, formatDate, recordsDueForRotation } from "@/lib/helpers";
 import { useWorkspace } from "./workspace-provider";
-import { Button, EmptyState, MetricCard, Panel, PanelHeader } from "./ui";
+import { EmptyState, MetricCard, Panel, PanelHeader } from "./ui";
 import { AlertItem, EmptyRows, KeyTable, MiniChart } from "./shared-components";
 
 export function DashboardPage({ onAddKey }: { onAddKey: () => void }) {
@@ -24,7 +25,7 @@ export function DashboardPage({ onAddKey }: { onAddKey: () => void }) {
 
       <section className="dashboard-grid">
         <Panel className="analytics-panel">
-          <PanelHeader icon={<BarChart3 size={18} />} title="API Key Analytics" action={<a href="/analytics" className="button small-button">View Analytics</a>} />
+          <PanelHeader icon={<BarChart3 size={18} />} title="API Key Analytics" action={<Link href="/analytics" className="button small-button">View Analytics</Link>} />
           {workspace!.records.length ? (
             <MiniChart records={workspace!.records} />
           ) : (
@@ -47,7 +48,7 @@ export function DashboardPage({ onAddKey }: { onAddKey: () => void }) {
       </section>
 
       <Panel>
-        <PanelHeader icon={<WalletCards size={18} />} title="Recent API Keys" action={<a href="/keys" className="button small-button">Manage Keys</a>} />
+        <PanelHeader icon={<WalletCards size={18} />} title="Recent API Keys" action={<Link href="/keys" className="button small-button">Manage Keys</Link>} />
         {recentRecords.length ? <KeyTable records={recentRecords} compact /> : <EmptyRows />}
       </Panel>
     </div>

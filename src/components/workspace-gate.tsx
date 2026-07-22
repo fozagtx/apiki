@@ -18,8 +18,8 @@ export function WorkspaceGate({
 }: {
   apiStatus: LiveStatus;
   workspace: WorkspaceEnvelope | null;
-  onCreate: (workspace: WorkspaceEnvelope, key: CryptoKey) => Promise<void> | void;
-  onUnlock: (key: CryptoKey) => void;
+  onCreate: (workspace: WorkspaceEnvelope, key: CryptoKey, passphrase: string) => Promise<void> | void;
+  onUnlock: (key: CryptoKey, passphrase: string) => void;
 }) {
   const [mode, setMode] = useState<"unlock" | "create">(workspace ? "unlock" : "create");
   const [workspaceName, setWorkspaceName] = useState("Personal Workspace");
@@ -47,10 +47,10 @@ export function WorkspaceGate({
           passphrase,
           records: [],
         });
-        await onCreate(envelope, key);
+        await onCreate(envelope, key, passphrase);
       } else if (workspace) {
         const key = await unlockWorkspace(workspace, passphrase);
-        onUnlock(key);
+        onUnlock(key, passphrase);
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Workspace operation failed.");

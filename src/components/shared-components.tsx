@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, Eye, EyeOff, MoreHorizontal, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, Copy, Eye, EyeOff, MoreHorizontal, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button, IconButton } from "./ui";
 import { formatDate, maskSecret } from "@/lib/helpers";
@@ -98,12 +98,12 @@ export function EmptyRows() {
 
 export function AlertItem({ body, tone, title }: { body: string; tone: "ok" | "warning"; title: string }) {
   return (
-    <div className={`alert-item alert-${tone}`}>
+    <div className={`alert-item ${tone}`}>
+      <span>{tone === "ok" ? <Check size={18} /> : <AlertTriangle size={18} />}</span>
       <div>
         <strong>{title}</strong>
         <p>{body}</p>
       </div>
-      {tone === "ok" ? <Check size={18} /> : null}
     </div>
   );
 }

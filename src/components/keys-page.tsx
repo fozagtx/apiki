@@ -3,10 +3,9 @@
 import { ChevronDown, Copy, Eye, EyeOff, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { decryptString } from "@/lib/crypto";
-import { ENVIRONMENTS, type Environment, type WorkspaceEnvelope, type WorkspaceRecord } from "@/lib/types";
+import { ENVIRONMENTS, type Environment, type WorkspaceRecord } from "@/lib/types";
 import { useWorkspace } from "./workspace-provider";
 import { Button, EmptyState, IconButton, Panel } from "./ui";
-import { KeyTable } from "./shared-components";
 
 export function KeysPage({ onAddKey }: { onAddKey: () => void }) {
   const { workspace, cryptoKey, updateWorkspace, setToast } = useWorkspace();

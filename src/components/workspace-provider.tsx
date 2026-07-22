@@ -2,7 +2,10 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { deleteWorkspace, getErrorMessage, loadApiStatus, loadWorkspace, saveWorkspace } from "@/lib/api";
+import { unlockWorkspace } from "@/lib/crypto";
 import type { LiveStatus, WorkspaceEnvelope } from "@/lib/types";
+
+const SESSION_PASSPHRASE_KEY = "apiki.workspace.passphrase";
 
 type WorkspaceContextValue = {
   workspace: WorkspaceEnvelope | null;
@@ -22,9 +25,35 @@ type WorkspaceContextValue = {
   updateWorkspace: (updater: (current: WorkspaceEnvelope) => WorkspaceEnvelope, successMessage?: string) => Promise<boolean>;
   resetWorkspaceAction: () => Promise<void>;
   lockWorkspace: () => void;
+  rememberPassphrase: (passphrase: string) => void;
 };
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
+
+function readStoredPassphrase() {
+  if (typeof window === "undefined") return "";
+  try {
+    return sessionStorage.getItem(SESSION_PASSPHRASE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeStoredPassphrase(passphrase: string) {
+  try {
+    sessionStorage.setItem(SESSION_PASSPHRASE_KEY, passphrase);
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+function clearStoredPassphrase() {
+  try {
+    sessionStorage.removeItem(SESSION_PASSPHRASE_KEY);
+  } catch {
+    // ignore
+  }
+}
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [workspace, setWorkspace] = useState<WorkspaceEnvelope | null>(null);
@@ -34,15 +63,31 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [isAddOpen, setAddOpen] = useState(false);
   const [toast, setToast] = useState("");
 
+  const rememberPassphrase = useCallback((passphrase: string) => {
+    writeStoredPassphrase(passphrase);
+  }, []);
+
   const refreshWorkspace = useCallback(async () => {
     setWorkspaceLoading(true);
     try {
       const [status, nextWorkspace] = await Promise.all([loadApiStatus(), loadWorkspace()]);
       setApiStatus(status);
       setWorkspace(nextWorkspace);
+
+      const stored = readStoredPassphrase();
+      if (nextWorkspace && stored) {
+        try {
+          const key = await unlockWorkspace(nextWorkspace, stored);
+          setCryptoKey(key);
+        } catch {
+          clearStoredPassphrase();
+          setCryptoKey(null);
+        }
+      }
     } catch (caught) {
       setApiStatus({ state: "error", message: getErrorMessage(caught, "Could not reach the live workspace.") });
       setWorkspace(null);
+      setCryptoKey(null);
     } finally {
       setWorkspaceLoading(false);
     }
@@ -86,6 +131,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   );
 
   const lockWorkspace = useCallback(() => {
+    clearStoredPassphrase();
     setCryptoKey(null);
     setToast("Workspace locked");
   }, []);
@@ -95,6 +141,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     if (!confirmed) return;
     try {
       await deleteWorkspace();
+      clearStoredPassphrase();
       setWorkspace(null);
       setCryptoKey(null);
       setToast("Live workspace reset");
@@ -124,8 +171,23 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       updateWorkspace,
       resetWorkspaceAction,
       lockWorkspace,
+      rememberPassphrase,
     }),
-    [workspace, cryptoKey, apiStatus, isWorkspaceLoading, unlocked, toast, isAddOpen, refreshWorkspace, persistWorkspace, updateWorkspace, resetWorkspaceAction, lockWorkspace],
+    [
+      workspace,
+      cryptoKey,
+      apiStatus,
+      isWorkspaceLoading,
+      unlocked,
+      toast,
+      isAddOpen,
+      refreshWorkspace,
+      persistWorkspace,
+      updateWorkspace,
+      resetWorkspaceAction,
+      lockWorkspace,
+      rememberPassphrase,
+    ],
   );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;

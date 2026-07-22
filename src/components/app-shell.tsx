@@ -15,10 +15,10 @@ import {
   Settings,
   Shield,
 } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button, IconButton } from "./ui";
 import { useWorkspace } from "./workspace-provider";
-import type { WorkspaceEnvelope } from "@/lib/types";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: Gauge },
@@ -47,10 +47,10 @@ export function AppShell({ children, currentPath }: { children: ReactNode; curre
             const Icon = item.icon;
             const isActive = currentPath === item.href;
             return (
-              <a key={item.href} href={item.href} className={isActive ? "active" : ""}>
+              <Link key={item.href} href={item.href} className={isActive ? "active" : ""}>
                 <Icon size={18} />
                 <span>{item.label}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -76,7 +76,7 @@ export function AppShell({ children, currentPath }: { children: ReactNode; curre
             <p>Encrypted workspace backed by SQLite</p>
           </div>
           <div className="header-actions">
-            <IconButton label="No provider notifications are not connected yet">
+            <IconButton label="Notifications not connected yet">
               <Bell size={18} />
             </IconButton>
             <Button icon={<Plus size={18} />} onClick={() => setAddOpen(true)} variant="primary">

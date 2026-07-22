@@ -2,15 +2,14 @@
 
 import { CalendarClock, RefreshCw, ShieldAlert } from "lucide-react";
 import { useMemo } from "react";
-import { daysUntil, formatDate, isRotationDue, nextRotationAt, recordsDueForRotation } from "@/lib/helpers";
+import { daysUntil, formatDate, isRotationDue, nextRotationAt } from "@/lib/helpers";
 import type { WorkspaceRecord } from "@/lib/types";
 import { useWorkspace } from "./workspace-provider";
 import { Button, EmptyState, Panel, PanelHeader } from "./ui";
 import { PolicyItem } from "./shared-components";
 
 export function RotationPage() {
-  const { workspace, updateWorkspace, setToast } = useWorkspace();
-  const dueRecords = useMemo(() => recordsDueForRotation(workspace!.records), [workspace]);
+  const { workspace, updateWorkspace } = useWorkspace();
   const sortedRecords = useMemo(() => [...workspace!.records].sort((a, b) => nextRotationAt(a).getTime() - nextRotationAt(b).getTime()), [workspace]);
 
   const markRotated = (record: WorkspaceRecord) => {
